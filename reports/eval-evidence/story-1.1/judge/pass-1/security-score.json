@@ -1,0 +1,14 @@
+{
+  "key": "story-1.1", "gate": "J2_security", "reviewPass": 1, "scoredAt": "2026-11-13T11:02:22Z",
+  "judgeModel": "claude-opus-5-5", "rubricVersion": "1.1.0",
+  "min": 0.85, "score": 0.78, "status": "FAIL",
+  "weighting": "SEC-05 N/A, excluded; remaining weights renormalised to 1.0 (divided by 0.90). Exact score 0.70/0.90 = 0.7778",
+  "criteria": [
+    { "id": "SEC-01", "owasp": "A01:2025", "weight": 0.20, "score": 1.0, "evidence": "/billing still wrapped in ProtectedRoute (App.jsx:56-62, unchanged); no route added" },
+    { "id": "SEC-02", "owasp": "A02:2025", "weight": 0.15, "score": 1.0, "evidence": "changed config vitest.config.js:43 (coverage include only), root playwright.config.ts (test-only); no CORS/header/debug change" },
+    { "id": "SEC-03", "owasp": "A03:2025", "weight": 0.20, "score": 0.0, "citation": "src/frontend/package.json:18-22 with src/frontend/.gitignore:11", "note": "three devDependencies (@amiceli/vitest-cucumber, @playwright/test, @testing-library/user-event) and a minimatch override are added with caret ranges, but package-lock.json is git-ignored, so the diff carries no lockfile update — rubric: 'added without a lockfile update' scores 0" },
+    { "id": "SEC-04", "owasp": "A05:2025", "weight": 0.25, "score": 1.0, "evidence": "PremiumUpgradeModal.jsx:58-84 and Billing.jsx:189-201 render static strings as JSX text; no dangerouslySetInnerHTML/innerHTML/eval" },
+    { "id": "SEC-05", "owasp": "A07:2025", "weight": 0.10, "score": "N/A", "reason": "the diff changes no login, token or session code" },
+    { "id": "SEC-06", "owasp": "A10:2025", "weight": 0.10, "score": 1.0, "evidence": "upgrade UI exists only after billing data loads (Billing.jsx:129-135 loading branch) — fails closed; no raw error rendered on the changed paths (TC-SEC-04 headed PASS)" }
+  ]
+}

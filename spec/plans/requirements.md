@@ -29,7 +29,7 @@
 | REQ-NF-02 | Visual consistency: the button reuses the existing teal primary `.btn` style from `App.css`; any modal styles follow the existing card look (white surface, rounded corners, existing colour palette). |
 | REQ-NF-03 | Accessibility: the button is a native `<button>`; the modal uses `role="dialog"`, `aria-modal="true"` and an accessible name (its heading), moves focus into the dialog on open and returns it to the button on close, and closes on Escape. |
 | REQ-NF-04 | Testability: the behaviour in REQ-F-01..05 is covered by Vitest + Testing Library unit tests under `tests/unit/frontend/`, meeting the project's unit coverage threshold for the changed files. |
-| REQ-NF-05 | Security (Security Baseline): static content only — no user-controlled data rendered as HTML (no `dangerouslySetInnerHTML`), no new dependencies added, no secrets. |
+| REQ-NF-05 | Security (Security Baseline): static content only — no user-controlled data rendered as HTML (no `dangerouslySetInnerHTML`), no new runtime dependencies added (test-only `devDependencies` such as the framework-mandated test runners are allowed), no secrets. Clarified 2026-11-13 with user approval during dev-implement Story 1.1 (spec defect) — prior text: ~~no new dependencies added~~. |
 
 ## Out of Scope
 - Any real plan change, payment, checkout, or persistence of a Premium plan.

@@ -1,0 +1,21 @@
+Test Placement Verification — story-1.1 — 2026-11-13T09:29:21Z
+Script: tests/.evals/scripts/check-test-placement.* absent — rules applied directly (work-unit-artifacts.md Section 2.3)
+Diff scope: git diff --name-only --diff-filter=ACMR 532e230 + untracked (story not yet committed)
+Code root: src/ (frontend at src/frontend)
+
+PATH                                                           CLASS        RULE                                     VERDICT
+tests/.evals/behavior/Containerfile                            other        n/a                                      PASS
+tests/.evals/behavior/run.sh                                   other        n/a                                      PASS
+tests/.evals/config.json                                       other        n/a                                      PASS
+tests/.evals/rubrics/architecture-rubric.json                  other        n/a                                      PASS
+tests/.evals/rubrics/security-rubric.json                      other        n/a                                      PASS
+tests/.evals/static/oxlint-complexity.json                     other        n/a                                      PASS
+tests/behavior/steps/story-1.1.behavior.test.jsx               other        behaviour step def/support -> tests/behavior/ PASS
+tests/behavior/support/backend-stub.js                         other        behaviour step def/support -> tests/behavior/ PASS
+tests/e2e/seed.spec.ts                                         other        playwright -> tests/e2e/                 PASS
+tests/unit/frontend/components/PremiumUpgradeModal.test.jsx    unit-test    rule2: unit test under tests/unit/       PASS (mirrors src/frontend/src/components)
+tests/unit/frontend/pages/Billing.test.jsx                     unit-test    rule2: unit test under tests/unit/       PASS (mirrors src/frontend/src/pages)
+
+Rule 1 (no test under src/): 0 test files under src/
+Rule 3 (api test in tests/unit/): 0 found
+Rule 4 (new tests/unit/ top-level folders): frontend -> src/frontend exists (mirrored)

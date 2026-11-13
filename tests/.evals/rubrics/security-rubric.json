@@ -1,6 +1,6 @@
 {
   "rubricName": "Security — OWASP Top 10:2025 — StreamPlex",
-  "rubricVersion": "1.0.0",
+  "rubricVersion": "1.1.0",
   "derivedFrom": ["OWASP Top 10:2025", "spec/plans/architecture.md"],
   "evalCriteria": [
     {

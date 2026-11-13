@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
+import PremiumUpgradeModal from '../components/PremiumUpgradeModal'
 import '../App.css'
+
+const UPGRADE_COMING_SOON = 'Premium upgrades are coming soon'
 
 function InfoIcon() {
   return (
@@ -78,6 +81,27 @@ export default function Billing() {
   const [data, setData] = useState(null)
   const [activating, setActivating] = useState(false)
   const [activateError, setActivateError] = useState('')
+  const [showUpgrade, setShowUpgrade] = useState(false)
+  const [upgradeMessage, setUpgradeMessage] = useState('')
+  const upgradeButtonRef = useRef(null)
+
+  const openUpgrade = () => {
+    setUpgradeMessage('')
+    setShowUpgrade(true)
+  }
+
+  // Cancel / Close / Escape: dismiss without changes and return focus (AC-4).
+  const closeUpgrade = () => {
+    setShowUpgrade(false)
+    upgradeButtonRef.current?.focus()
+  }
+
+  // Continue: no network call, plan stays Standard (AC-3, AC-5).
+  const continueUpgrade = () => {
+    setShowUpgrade(false)
+    setUpgradeMessage(UPGRADE_COMING_SOON)
+    upgradeButtonRef.current?.focus()
+  }
 
   const loadBilling = () => {
     fetch(`/api/billing?email=${encodeURIComponent(token)}`)
@@ -162,6 +186,19 @@ export default function Billing() {
               <span className="badge active">Active</span>
             </div>
           </div>
+          <button
+            ref={upgradeButtonRef}
+            type="button"
+            className="btn upgrade-btn"
+            onClick={openUpgrade}
+          >
+            Upgrade to Premium
+          </button>
+          {upgradeMessage && (
+            <p className="upgrade-notice" role="status">
+              {upgradeMessage}
+            </p>
+          )}
         </div>
         <div className="renew-card">
           <div className="renew-title">Renew at</div>
@@ -204,6 +241,12 @@ export default function Billing() {
       <div className="usage-extras usage-extras-single">
         <IncludedUsageCard data={data.included_usage} />
       </div>
+
+      <PremiumUpgradeModal
+        open={showUpgrade}
+        onContinue={continueUpgrade}
+        onClose={closeUpgrade}
+      />
     </div>
   )
 }

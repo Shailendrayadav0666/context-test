@@ -1,0 +1,27 @@
+
+ RUN  v5.1.0 C:/Users/shailendra.yadav/Desktop/projects/context-test/src/frontend
+      Coverage enabled with v8
+
+
+ Test Files  2 passed (2)
+      Tests  21 passed (21)
+   Start at  15:02:53
+   Duration  6.25s (environment 69%, import 18%, tests 8%, transform 3%, worker 1%)
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   50.84 |       55 |   58.62 |   53.57 |                   
+ context           |       0 |        0 |       0 |       0 |                   
+  AuthContext.jsx  |       0 |        0 |       0 |       0 | 4-77              
+ pages             |    75.4 |     87.5 |   81.25 |    75.4 |                   
+  ActivatePlan.jsx |       0 |        0 |       0 |       0 | 7-28              
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 50.84% ( 60/118 )
+Branches     : 55% ( 22/40 )
+Functions    : 58.62% ( 17/29 )
+Lines        : 53.57% ( 60/112 )
+================================================================================

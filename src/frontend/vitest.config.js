@@ -40,7 +40,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'cobertura'],
       reportsDirectory: 'coverage',
-      include: ['src/context/AuthContext.jsx', 'src/pages/Billing.jsx', 'src/pages/ActivatePlan.jsx'],
+      include: ['src/context/AuthContext.jsx', 'src/pages/Billing.jsx', 'src/pages/ActivatePlan.jsx', 'src/components/PremiumUpgradeModal.jsx'],
     },
   },
 })

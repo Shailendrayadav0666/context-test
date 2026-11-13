@@ -1,0 +1,24 @@
+{
+  "key": "story-1.1",
+  "base": "532e230",
+  "threshold": 90,
+  "files": [
+    {
+      "path": "src/frontend/src/pages/Billing.jsx",
+      "changedExecutableLines": 15,
+      "coveredLines": 15,
+      "changedBranches": 2,
+      "coveredBranches": 2
+    },
+    {
+      "path": "src/frontend/src/components/PremiumUpgradeModal.jsx",
+      "changedExecutableLines": 14,
+      "coveredLines": 14,
+      "changedBranches": 8,
+      "coveredBranches": 8
+    }
+  ],
+  "lineCoverage": 100,
+  "branchCoverage": 100,
+  "status": "PASS"
+}

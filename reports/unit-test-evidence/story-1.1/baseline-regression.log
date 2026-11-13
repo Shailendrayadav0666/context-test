@@ -1,0 +1,16 @@
+== Baseline regression — 2026-11-13T09:02:22Z — branch story/1.1-upgrade-to-premium-button-with-premium-details-modal @ 532e230
+== Frontend: (cd src/frontend && npx vitest run --passWithNoTests)
+
+ RUN  v5.1.0 C:/Users/shailendra.yadav/Desktop/projects/context-test/src/frontend
+
+No test files found, exiting with code 0
+
+include: **/*.test.jsx
+exclude:  **/node_modules/**, **/.git/**
+
+exit=0
+== Backend: (cd src/backend && venv/Scripts/python -m pytest -q)
+C:\Users\shailendra.yadav\Desktop\projects\context-test\src\backend\venv\Scripts\python.exe: No module named pytest
+
+no tests ran in 0.01s
+exit=5

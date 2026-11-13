@@ -1,0 +1,4 @@
+title = "AIRE gitleaks config - default ruleset"
+
+[extend]
+useDefault = true

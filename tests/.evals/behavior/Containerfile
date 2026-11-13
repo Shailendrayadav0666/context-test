@@ -1,0 +1,23 @@
+# Behaviour test image — built and run by Podman locally and in CI (identical image, Section 4.1b).
+# Base: the src/frontend root's runtime (ci.roots[].runtimeVersion = 22); vitest 5 / vite 8 / jsdom 27
+# all accept node ^22.12 (engines checked, behavior-spec.md Section 5.2.1).
+FROM docker.io/library/node:22-slim
+
+WORKDIR /work
+
+# >>> STACK-RESOLVED BEHAVIOUR DEPS START <<<
+# The Gherkin runner (@amiceli/vitest-cucumber) is a devDependency of src/frontend, so the project's own
+# lockfile installs it with everything the step definitions import. package.json + package-lock.json is
+# the complete install closure (no workspaces, no file: references).
+COPY src/frontend/package.json src/frontend/package-lock.json /work/src/frontend/
+RUN cd /work/src/frontend && npm ci --no-audit --no-fund
+# >>> STACK-RESOLVED BEHAVIOUR DEPS END <<<
+
+# The repo is bind-mounted at /work at runtime. Callers mask the host's node_modules with an anonymous
+# volume (-v /work/src/frontend/node_modules), which Podman seeds from this image's Linux install.
+#
+# 🔴 ENTRYPOINT ["/bin/sh", "-c"] REQUIRES a SINGLE combined command string as the CMD — never two
+#    separate argv elements. `podman run ... IMAGE "bash tests/.evals/behavior/run.sh <tier>"` (one quoted
+#    string) works: sh -c parses and word-splits that whole string itself, so run.sh gets $1=<tier>
+#    correctly. Every caller of this image MUST use the single-combined-string form.
+ENTRYPOINT ["/bin/sh", "-c"]
