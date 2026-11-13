@@ -1,0 +1,12 @@
+version: 1
+generated_at: 2026-11-13T08:42:10Z
+team_size: 2
+
+shared_files: []          # single story — no file is touched by 2+ stories
+
+stories:
+  - id: "1.1"
+    title: Upgrade to Premium button with Premium details modal
+    tracker_id: LOCAL
+    requires: []
+    enables: []
