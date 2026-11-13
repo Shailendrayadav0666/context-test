@@ -157,3 +157,76 @@
 **Context**: Dependency Graph — Steps 1-8
 
 ---
+## Dependency Graph — Epic Branch Commit & Push
+**Timestamp**: 2026-11-13T08:42:16Z
+**User Email**: shailendra.yadav@3pillarglobal.com
+**User Input**: "(none — automatic step)"
+**AI Response**: "Committed b023040 (stories.md, personas.md, dependency-graph.yml, story-generation.md, aire-state.md, audit.md) on epic/upgrade-to-premium-button and pushed to origin. No PR raised."
+**Context**: Dependency Graph — Step 9
+
+---
+## Workflow Planning - Plan Finalized (auto-approved, no gate)
+**Timestamp**: 2026-11-13T08:43:03Z
+**User Email**: shailendra.yadav@3pillarglobal.com
+**AI Response**: "Execution plan created (spec/plans/executions.md): skip Application Design, Functional Design, NFR Requirements, NFR Design, Infrastructure Design; execute STOP CHECKPOINT (behaviour specs + test plans) and Code Generation via dev-implement. Proceeded automatically to the STOP CHECKPOINT without an approval gate."
+**Status**: Auto-approved
+**Context**: Workflow plan created; transition to IMPLEMENTATION PHASE (design stages all skipped)
+
+---
+
+## STOP CHECKPOINT — Reached; CI/CD Opt-In Prompt
+**Timestamp**: 2026-11-13T08:43:03Z
+**User Email**: shailendra.yadav@3pillarglobal.com
+**User Input**: "(pending)"
+**AI Response**: "Reached the mandatory STOP CHECKPOINT. No .github/workflows/agentic-eval-pipeline.yml exists and no ## CI/CD Configuration recorded — asked chat-only: 'Set up the CI/CD eval pipeline for this project? (yes/no)'."
+**Context**: STOP CHECKPOINT — Steps 1, 1.2
+
+---
+## STOP CHECKPOINT — CI/CD Opt-In Response
+**Timestamp**: 2026-11-13T08:43:42Z
+**User Email**: shailendra.yadav@3pillarglobal.com
+**User Input**: "no"
+**AI Response**: "Recorded CI/CD Configuration Enabled: No, Source: user opt-out. Steps 1.6 (CI pipeline) and 4 (epic smoke test) skipped; common/ci-pipeline-generation.md not loaded."
+**Context**: STOP CHECKPOINT — Step 1.2
+
+---
+## STOP CHECKPOINT — Design Artifacts (Steps 1.3-1.5)
+**Timestamp**: 2026-11-13T08:46:05Z
+**User Email**: shailendra.yadav@3pillarglobal.com
+**User Input**: "(none — automatic steps)"
+**AI Response**: "1.3: wrote spec/behavior.feature — explicitly records no cross-unit journeys (single work unit). 1.4: wrote spec/plans/architecture.md v1.0.0, assembled from RE artifacts, requirements and stories (design stages skipped, stated per section); inline C4Context + flowchart TB diagrams (no erDiagram — no store changed); Section 10 has 5 constraints ARCH-01..05, weights sum 1.00. 1.5: created tests/.evals/rubrics/architecture-rubric.json v1.0.0 (5 criteria, 1:1 from Section 10), security-rubric.json v1.0.0 (6 OWASP criteria: A01, A02, A03, A05, A07, A10; weights 1.00), tests/.evals/config.json (template; frontend root; judge model claude-opus-5-5). JSON validated. 1.6 skipped (CI opt-out). Part A: wrote spec/behavior/story-1.1.feature (10 scenarios, AC-1..AC-5). Invoking ve-implement in WORKFLOW MODE for Story 1.1."
+**Context**: STOP CHECKPOINT — Steps 1.3, 1.4, 1.5, 1.7 Part A
+
+---
+## Test Plan (ve-implement skill)
+**Timestamp**: 2026-11-13T08:47:55Z
+**User Email**: shailendra.yadav@3pillarglobal.com
+**User Input**: "1.1 mode: workflow (invoked by the STOP CHECKPOINT specs & test-plans stage)"
+**Story**: "1.1 — Upgrade to Premium button with Premium details modal — local Story ID 1.1"
+**Output folder**: `spec/test-plans/story-1.1-upgrade-to-premium-button-with-premium-details-modal/`
+**Verification Engineer branch / PR**: "none — workflow mode, files written on epic/upgrade-to-premium-button and carried by the caller's commit"
+**Mode**: workflow (invoked by the STOP CHECKPOINT specs & test-plans stage) — no Verification Engineer branch, no Verification Engineer PR
+**Test plans generated**: "E2E (8), Security (4), Accessibility (6) — N/A plans: Integration (boundary unchanged; covered in E2E), API (no endpoint change), Contract (not microservices), Performance (no targets)"
+**Coverage**: "5/5 acceptance criteria covered"
+**Approve / Request Changes checkpoint**: "Approved (automatic — workflow mode, no Verification Engineer review)"
+**AI Response**: "Generated black-box manual test plan (18 test cases) from Story 1.1 acceptance criteria; no application source read; no git activity."
+**Context**: `/ve-implement` skill — Test Plan (`test-plan.md`)
+
+---
+
+## STOP CHECKPOINT — Behaviour Specs & Test Plans Approval Prompt
+**Timestamp**: 2026-11-13T08:47:55Z
+**User Email**: shailendra.yadav@3pillarglobal.com
+**User Input**: "(pending)"
+**AI Response**: "Blocking coverage check passed: every AC-1..AC-5 has at least one @AC scenario (10 scenarios) and at least one manual test case (18 cases); story 1.1 has both a .feature file and a test-plans folder. Presented 2-option completion message (Request Changes / Continue to Next Stage)."
+**Context**: STOP CHECKPOINT — Step 1.7 Section 4
+
+---
+## STOP CHECKPOINT — Behaviour Specs & Test Plans Approval Response
+**Timestamp**: 2026-11-13T08:51:26Z
+**User Email**: shailendra.yadav@3pillarglobal.com
+**User Input**: "Continue to Next Stage"
+**AI Response**: "Behaviour specs and test plans approved. Marking 'Design complete — awaiting dev-implement', committing and pushing design artifacts on the epic branch. Step 4 smoke test skipped (CI Enabled: No)."
+**Context**: STOP CHECKPOINT — Steps 1.7, 2, 3, 4
+
+---

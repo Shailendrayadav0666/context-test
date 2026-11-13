@@ -1,0 +1,42 @@
+{
+  "rubricName": "Architectural Alignment — StreamPlex (Upgrade to Premium button)",
+  "rubricVersion": "1.0.0",
+  "derivedFrom": ["spec/plans/architecture.md#10-verifiable-constraints"],
+  "evalCriteria": [
+    {
+      "id": "ARCH-01",
+      "metric": "Frontend only, no new network calls",
+      "weight": 0.30,
+      "prompt": "The diff contains no change under `src/backend/`, and no added `fetch`, `XMLHttpRequest`, axios or other request call in the button/modal code path. Score 0 on any such change.",
+      "source": "spec/plans/requirements.md (REQ-NF-01)"
+    },
+    {
+      "id": "ARCH-02",
+      "metric": "Presentational modal component",
+      "weight": 0.25,
+      "prompt": "The modal component does not call `useAuth`, `fetch` or router hooks, and does not hold the open/closed state itself; Billing.jsx owns that state. Score 0 if the modal reads auth/API data or manages its own visibility.",
+      "source": "spec/plans/stories.md (Story 1.1), spec/plans/architecture.md Section 3"
+    },
+    {
+      "id": "ARCH-03",
+      "metric": "Active-plan-only rendering",
+      "weight": 0.20,
+      "prompt": "The button element appears only inside the branch rendered when billing data exists and `has_plan !== false`, never in the loading or \"No active plan\" branches. Score 0 otherwise.",
+      "source": "spec/plans/requirements.md (REQ-F-02)"
+    },
+    {
+      "id": "ARCH-04",
+      "metric": "Accessible dialog semantics",
+      "weight": 0.15,
+      "prompt": "The modal root has `role=\"dialog\"`, `aria-modal=\"true\"` and an accessible name from its heading; code moves focus into it on open, restores focus to the trigger on close, and handles Escape. Score 0 if any of these is missing.",
+      "source": "spec/plans/requirements.md (REQ-NF-03)"
+    },
+    {
+      "id": "ARCH-05",
+      "metric": "Reuse existing styling, no new dependencies",
+      "weight": 0.10,
+      "prompt": "The button uses the `btn` class from App.css, and `src/frontend/package.json` dependencies/devDependencies are unchanged. Score 0 if a new package is added or the button bypasses `.btn` for a different primary style.",
+      "source": "spec/plans/requirements.md (REQ-NF-02, REQ-NF-05)"
+    }
+  ]
+}

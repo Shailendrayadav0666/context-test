@@ -1,0 +1,55 @@
+{
+  "rubricName": "Security — OWASP Top 10:2025 — StreamPlex",
+  "rubricVersion": "1.0.0",
+  "derivedFrom": ["OWASP Top 10:2025", "spec/plans/architecture.md"],
+  "evalCriteria": [
+    {
+      "id": "SEC-01",
+      "owasp": "A01:2025",
+      "metric": "Broken access control",
+      "weight": 0.20,
+      "prompt": "Review every route and endpoint in the diff. Score 0 if any changed frontend route that shows account or billing data is rendered outside `ProtectedRoute`, or any changed backend endpoint reads or mutates user data without checking the caller owns it. Cite the file and line.",
+      "source": "https://owasp.org/Top10/2025/A01_2025-Broken_Access_Control/"
+    },
+    {
+      "id": "SEC-02",
+      "owasp": "A02:2025",
+      "metric": "Security misconfiguration",
+      "weight": 0.15,
+      "prompt": "Check changed configuration (vite config, CORS middleware, headers, environment flags). Score 0 if the diff widens CORS, disables a security header, enables debug output in production, or exposes a dev-only proxy or setting to production. Cite the file and line.",
+      "source": "https://owasp.org/Top10/2025/A02_2025-Security_Misconfiguration/"
+    },
+    {
+      "id": "SEC-03",
+      "owasp": "A03:2025",
+      "metric": "Software supply chain failures",
+      "weight": 0.20,
+      "prompt": "Check `package.json`, `package-lock.json` and `requirements*.txt` in the diff. Score 0 if a dependency is added from an untrusted source, added without a lockfile update, or pinned to a version with a known critical or high vulnerability. Cite the file and line.",
+      "source": "https://owasp.org/Top10/2025/A03_2025-Software_Supply_Chain_Failures/"
+    },
+    {
+      "id": "SEC-04",
+      "owasp": "A05:2025",
+      "metric": "Injection",
+      "weight": 0.25,
+      "prompt": "Check every place in the diff where text is rendered or passed to a query or command. Score 0 if any changed code uses `dangerouslySetInnerHTML`, `innerHTML`, `eval` or `new Function`, or interpolates external input into a query, command or URL without encoding. Cite the file and line.",
+      "source": "https://owasp.org/Top10/2025/A05_2025-Injection/"
+    },
+    {
+      "id": "SEC-05",
+      "owasp": "A07:2025",
+      "metric": "Authentication failures",
+      "weight": 0.10,
+      "prompt": "Check changed login, token and session code. Score 0 if the diff logs, renders or persists a password or token in a new location, or bypasses the existing auth check. Cite the file and line.",
+      "source": "https://owasp.org/Top10/2025/A07_2025-Authentication_Failures/"
+    },
+    {
+      "id": "SEC-06",
+      "owasp": "A10:2025",
+      "metric": "Mishandling of exceptional conditions",
+      "weight": 0.10,
+      "prompt": "Check changed error-handling paths. Score 0 if a changed path renders a raw error or stack trace to the user, or fails open (shows privileged UI or data) when data is missing or a request fails. Cite the file and line.",
+      "source": "https://owasp.org/Top10/2025/A10_2025-Mishandling_of_Exceptional_Conditions/"
+    }
+  ]
+}

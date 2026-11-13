@@ -28,8 +28,15 @@
 - [x] Reverse Engineering
 - [x] Requirements Analysis
 - [x] User Stories
-- [ ] Dependency Graph
-- [ ] Workflow Planning
+- [x] Dependency Graph
+- [x] Workflow Planning
+- [ ] Application Design - SKIP (single presentational component)
+- [ ] Functional Design - SKIP (no data models or business logic)
+- [ ] NFR Requirements - SKIP (stack fixed; NFRs captured in REQ-NF)
+- [ ] NFR Design - SKIP (NFR Requirements skipped)
+- [ ] Infrastructure Design - SKIP (no infra change)
+- [x] STOP CHECKPOINT: behaviour specs + test plans
+- [ ] Code Generation (dev-implement) - EXECUTE
 
 ## Branching
 - Base Branch: main
@@ -80,3 +87,24 @@ graph TD
 - Blocked: none
 - Inferred edges: none (single story)
 - Parallelism: 1 startable story vs team_size 2 — below target by design (user requested a single story)
+
+## Current Status
+- **Lifecycle Phase**: IMPLEMENTATION
+- **Current Stage**: Design complete — awaiting dev-implement
+- **Next Stage**: Behaviour specs + test plans (one approval), then dev-implement
+
+## CI/CD Configuration
+- Enabled: No
+- Source: user opt-out
+
+## Behaviour Specs & Test Plans
+- **Work units covered**: 1
+- **Behaviour contracts**: spec/behavior/ — 1 file(s), 10 scenarios
+- **Manual test plans**: spec/test-plans/ — 1 folder(s), 18 test cases
+- **AC coverage**: 5/5 (scenarios) · 5/5 (test cases)
+- **Approved**: 2026-11-13T08:51:26Z
+
+## Architecture
+- spec/plans/architecture.md v1.0.0 — 5 verifiable constraints; rubrics v1.0.0
+
+Design complete — awaiting dev-implement
