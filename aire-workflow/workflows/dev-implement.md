@@ -1,0 +1,768 @@
+# WORKFLOW: `dev-implement` (Implementation Phase — Code Generation)
+
+## READ FIRST — THE NON-NEGOTIABLES OF EVERY `dev-implement` RUN
+
+Observed in a real run: the story shipped a PR with D3/D5/D6/D7, B1/B2 and J1/J2 never run and the
+tracker claim made only locally, "disclosed" as a scope call to keep the session moving, and ended on a
+free-form summary. Every one of those is forbidden:
+
+1. **Every gate runs.** No gate is skipped, deferred or "scoped out" to finish sooner. A gate ends only as
+   `PASS`, or `N/A` for a reason on the closed list (`common/eval-framework.md` Section 2.5.1). A missing
+   tool is installed through the full chain; a gate that truly cannot run is an `ERROR` that HALTS the
+   run. "Not run this session", "scope call", "to keep the session moving" and every reason in Section
+   2.5.2 are forbidden.
+2. **The Gate Ledger is complete before the commit** (`common/work-unit-artifacts.md` Section 6). Any
+   gate that is not `PASS` or a legitimate `N/A` means no commit and no PR: HALT with the Self-Heal Limit
+   message.
+3. **The pre-commit guard is installed and never bypassed.** Right after the story branch is cut (Step 1.5 item 4.4), run
+   `sh aire-workflow/templates/hooks/check-work-unit.sh --install <unit-key>`. Right before the commit, run
+   `sh aire-workflow/templates/hooks/check-work-unit.sh <unit-key>`; the git hook runs it again on the
+   commit. A refusal is fixed by doing the missing work — `git commit --no-verify` is forbidden.
+4. **The claim happens on the external tracker too, before any branch or code.** For a non-LOCAL
+   Tracker ID: transition to In Development AND assign the operator (`common/tracker-sync.md` Sections 4
+   and 5), verify both by re-fetching, and write the results into the fragment's `## Claim` block.
+   Updating only the local fragment is a defect, and the work-unit guard refuses a commit without the
+   block.
+5. **Disclosing a gap does not make it acceptable.** The moment you notice a gate unrun, a transition
+   unmade or a file missing is the moment to do the work — or to HALT with the Self-Heal Limit message.
+   Never raise a PR with "disclosed gaps", and never ask the user whether to skip.
+6. **The run ends with its exact end message.** A successful run's final output is the Section F Next-Action Handoff block,
+   verbatim, every placeholder substituted, and nothing else in that message — no free-form summary
+   before it, no gap list, no suggestions after it. Progress lines earlier in the run are fine; the last
+   message is the block. A halted run ends with the Self-Heal Limit message instead, also verbatim.
+
+---
+
+## THIS WORKFLOW IS FULLY AUTOMATIC — IT ASKS NOTHING AFTER THE STORY KEY
+
+**Typing `dev-implement` and naming the story is the ONLY user decision in the entire run.**
+Everything after it — the implementation plan, code generation, the unit-test/coverage gate, the
+API & Contract Testing gate (when the story touches an API layer), the regression gates, the
+automated Code Review, the remediation of any findings it reports, the
+commit, the push, the PR and the PR review — happens without a single approval prompt.
+
+- There is NO GATE 2 (plan approval). The plan is written, announced, and executed.
+- There is NO GATE 3 (review decision). A review with findings is remediated automatically,
+  then re-reviewed, looping until the review comes back clean — the user is never asked to choose
+  between "Approve & continue" and "Remediate".
+- **Never write the word "GATE" into an audit heading from this workflow.** Plan and review
+  outcomes are logged as auto-approved decisions, not gated ones.
+- The machine checkpoints that DO still stop the run are not approvals and remain fully in force:
+  the **Doability Gate** and the **Story Branch dependency-merge check**. The Doability Gate **never
+  merges a prerequisite's PR itself, not even one a human has already approved** — merging is always
+  a manual action the user performs outside this workflow. It simply stops — naming the reason — for
+  any prerequisite that isn't merged yet, whether it's unapproved, draft, conflicted, blocked by
+  required checks, or already approved and just waiting on the user to merge it.
+- A user who volunteers a correction at any point (plan, code, review finding) is an interrupt —
+  apply it and continue. Never convert it into a standing gate.
+- **Automatic does not mean unbounded.** Every self-healing loop in this workflow is capped at
+  **3 remediation attempts** by the Self-Healing Retry Policy (SH-1 … SH-7) below. When a loop
+  exhausts its budget the run HALTS at that gate, emits the Self-Heal Limit message
+  (`common/self-heal-limit-guidance.md`) and waits for the developer's manual fix. A failing gate is never passed, skipped, weakened, or carried forward.
+
+---
+
+## SELF-HEALING RETRY POLICY (SH-1 … SH-7) — BINDING ON EVERY AUTOMATIC LOOP IN THIS WORKFLOW
+
+Any gate in this workflow that detects a failure and fixes it without user input is a **self-healing
+loop. Every such loop is bounded by the rules below. These rules override any wording elsewhere in
+this file that describes a loop as uncapped, unbounded, or repeating "until clean" with no limit.**
+
+**Governed loops — each has its own independent attempt counter:**
+
+| ID | Loop | Defined in | Verification that must pass to exit the loop |
+|---|---|---|---|
+| **SH-LOOP-1** | Unit Test & Coverage | Step 6 | All unit tests green **and** coverage on new/changed code ≥ 90% |
+| **SH-LOOP-7** | Behavioural B1 + B2 (Gherkin) | Step 6.1 | This unit's scenarios pass with every AC tag executed, AND every other feature file in the repo stays green |
+| **SH-LOOP-8** | Behavioural B3 (epic scope) | Step 6.1 | On the LAST work unit only: the whole cycle suite + the `spec/behavior.feature` cross-unit journeys pass |
+| **SH-LOOP-2** | API & Contract Testing | Step 6.2 | Every applicable checklist item passes on every touched endpoint |
+| **SH-LOOP-12** | Test Placement Verification | Step 6.3 | Zero violations — every new/changed unit test under `tests/unit/<mirror-of-src>/`, every new/changed API test under `tests/api/`, none under `src/` |
+| **SH-LOOP-3** | Full Regression | Step 6.5 | Zero NEW failures versus `baseline-regression.log` |
+| **SH-LOOP-4** | Static Eval D1–D7 | Step 6.6 | Zero NEW findings above the `tests/.evals/config.json` thresholds on changed files |
+| **SH-LOOP-11** | Playwright UI Automation | Step 6.7 | Every generated Playwright spec passes (zero `test.fixme()` outcomes), when the story touches UI |
+| **SH-LOOP-13** | Playwright E2E Regression | Step 6.8 | Zero NEW failing Playwright specs versus the Step 1.5 Item 4.7 baseline — runs for EVERY story, UI or not |
+| **SH-LOOP-6** | Judge Gates J1 + J2 | Section A Step 2.5 | `J1 ≥ llmJudgeArchitectureScoreMin` **and** `J2 ≥ llmJudgeSecurityScoreMin` (`N/A` passes) |
+| **SH-LOOP-5** | Auto-Remediate (code review + security findings) | Section C | Review verdict clean — zero 🔴 and zero 🟠 |
+| **SH-LOOP-9** | CI Preflight (provisioning + manifest executability) — **N/A when `## CI/CD Configuration` `Enabled: No`** | Section D Step 2.5 | Every CI entrypoint runs in a clean room with zero missing tools, zero undeclared dependencies, zero Manifest defects, and no gate `N/A`/qualified-pass on a root this unit touched |
+| **SH-LOOP-10** | CI Attestation (post-PR provisioning agreement) — **N/A when `## CI/CD Configuration` `Enabled: No`** | Section D Step 8 | CI's `gates` block agrees with this story's own local gate results on every root the diff touched — no gate the diff touched is absent, `N/A`, or provisioning-errored in CI when it passed locally |
+| **SH-LOOP-16** | Artifact Completeness | Section D Step 1.2 | Every evidence file `common/work-unit-artifacts.md` Section 1 requires for this unit exists, has its set format, agrees with `eval.json` / `eval-summary.md`, and no folder exists for an `N/A` gate |
+
+**SH-1 … SH-7** — the retry policy in `common/self-heal-limit-guidance.md` Section 0 binds every loop in
+the table above, and at SH-4 the run emits that file's Section 2 message verbatim. Values for this
+workflow: work unit = this story (`story-<N.M>`); branch = its story branch; audit heading label = `Story N.M`;
+resume keyword = `dev-implement`.
+
+---
+
+## MANDATORY: Rule Details Loading
+
+This workflow may be invoked standalone (the user just types `dev-implement`, possibly in a fresh session). Before doing anything else, resolve the rule details directory (check  `aire-workflow/`) and load:
+- `common/process-overview.md`, `common/session-continuity.md`, `common/content-validation.md`
+- `common/parallel-work-state.md` (this story's state fragment), `common/behavior-spec.md` (Steps 4.5
+  and 6.1), `common/directory-structure.md` (code root and test placement)
+- The REQ-ID thread rules from `common/requirements-traceability.md` (plan-level trace + fallback coverage verification)
+- The eval rules from `common/eval-framework.md` (the Static Eval Gate D1–D7 at Step 1.5 Item 4.6 + Step 6.6, and the J1/J2 judge scores inside Section A)
+- `common/work-unit-artifacts.md` — the complete evidence set this run must leave behind (paths, the `evidence-manifest.md` format, the N/A-means-no-folder rule, keyed security-review names) and the Artifact Completeness Check before the commit
+- `common/self-heal-limit-guidance.md` — the Self-Heal Limit message, the per-gate manual-fix playbook and the hand-back (resume) protocol used when a self-healing loop exhausts its budget or a tool cannot be installed
+- The branching model from `common/branching-strategy.md` (epic branch → story branches)
+- **CI/CD is opt-in** — before touching any CI-specific step, read `## CI/CD Configuration` in `runtime-artifacts/aire-state.md` (recorded at `CLAUDE.md`'s MANDATORY STOP Step 1.2). `Enabled: No` means Section D's Manifest Reconciliation (Step 1.5), CI Preflight Gate (Step 2.5) and CI Attestation Gate (Step 8) are ALL skipped — go straight from the commit to the push + PR, then Section E. `Enabled: Yes` (the default when CI/CD was set up) means the CI contract from `common/ci-pipeline-generation.md` — Section 4.0d (working directory is a manifest fact), Section 4.0f (manifest reconciliation, Section D Step 1.5), Section 4.0i (the CI Preflight Gate, Section D Step 2.5) and Section 6.6 (which repair agent owns which failure once the PR exists) — applies in full. Load it at the latest when Section D is reached — the preflight and attestation gates are unexecutable without it.
+- Story selection steps from `implementation/story-selection.md`
+- The detailed code generation steps from `implementation/code-generation.md`. Follow the Guardrail defined there (Generation Phase Rules) for any generated code.
+- **Do NOT pre-load** `extensions/testing/playwright-automation/playwright-automation.md` or `implementation/test-plan.md` — Step 6.7 reaches them by invoking the `ve-implement` and `playwright-implement` skills in WORKFLOW MODE, and each skill loads its own rule files.
+  **BUT: those files carry the anti-shortcut rules, and you will not have read them if you skip the skill — a circular trap that has caused a real violation.** So the three non-negotiables are restated HERE, where they are always in context:
+  1. **The ONLY permitted producer of `tests/e2e/**` and `spec/playwright-specs/**` is the `playwright-implement` skill's own Planner/Generator subagents.** If you are about to `Write`/`Edit` a `.spec.*` file and no `Skill(playwright-implement)` call has happened this run, you are violating the gate.
+  2. **"The Playwright agents aren't installed" is an instruction to INSTALL them** (`npx playwright init-agents --loop=claude`), then HALT for a session restart. It is never permission to hand-author.
+  3. **Disclosing the shortcut does not make it allowed**, and a prior story that did it is a defect to backfill, not precedent.
+- The reviewer steps from `workflows/code-review.md` (auto-run after code generation) and the fixer steps from `workflows/remediate.md` (on the Remediate path)
+
+**GUARDRAIL — `code-review` and `remediate` are WORKFLOW RULE FILES, NOT Claude skills.** Whenever this workflow "runs Code Review" or "runs Remediate", you MUST `Read` and follow `workflows/code-review.md` / `workflows/remediate.md` (which pull their detailed steps from `implementation/code-review.md` / `implementation/remediate.md`) as instructions. There is NO Claude skill named `code-review` or `remediate` — NEVER invoke one via the Skill tool.
+
+**The converse guardrail — these four ARE real Claude skills, and are INVOKED via the Skill tool, never re-implemented inline**: `ve-implement` and `playwright-implement` (Step 6.7, both in WORKFLOW MODE with the story passed in), `pr-generator` (Section D, workflow mode), and `pr-review` (Section E, AUTO MODE). Copying their steps into this workflow instead of invoking them is a defect — it forks the mechanics and lets the manual and automatic paths drift apart.
+
+This workflow also uses the `pr-generator` Claude skill (`.claude/skills/pr-generator/`) to push the branch and raise the PR — always pass it the target branch explicitly (story PRs target the Epic Branch from `runtime-artifacts/aire-state.md` `## Branching`). Passing a target means it runs in workflow mode, where its Phase 5 confirmation is skipped and the push + PR happen automatically (the user's `dev-implement` invocation is the authorization). NEVER edit that skill — invoke it as-is.
+
+After the PR is raised (the story STAYS `In Development` — it is promoted to `Ready for Testing` only when the PR MERGES), this workflow also auto-invokes the `pr-review` Claude skill (`.claude/skills/pr-review/`) against that same PR in its AUTO MODE — it posts a plain COMMENT review (summary + inline comments) automatically, with no user prompt and no formal GitHub approve/request-changes. NEVER edit that skill — invoke it as-is.
+
+This workflow does NOT itself flip any story's tracker status to `Ready for Testing` — that promotion is performed ONLY by the `ve-list-work` skill (`.claude/skills/ve-list-work/`), which ve runs separately on the epic branch after it has tested the merged stories. Instead, when the user picks a story that `requires` another story, the Doability Gate (`implementation/story-selection.md` Step 4) checks that specific prerequisite's PR merge state LIVE, right there — if it's already merged the pick proceeds; if it is not merged for any reason — including an already-approved PR just waiting to be merged — the gate blocks with a clear message and the run stops. The gate never merges anything itself. See Step 1.5 below.
+
+All paths below are relative to the resolved rule details directory.
+
+---
+
+## MANDATORY: Audit Entry Format for this Workflow — TRACKER ITEM on EVERY entry
+
+**EVERY runtime-artifacts/audit.md entry written during a `dev-implement` run — from Story Selection, through the Story Branch checkpoint, code-generation planning, code generation done, Unit Test & Coverage, automated Code Review, Remediate, and Approve/PR — MUST include the `**User Email**:`, `**TRACKER ITEM**:`, `**Epic Link**:` and `**AIRE VERSION**:` fields.** No dev-implement audit entry may omit them.
+
+```markdown
+## [Stage Name or Interaction Type]
+**Timestamp**: [ISO timestamp]
+**User Email**: [current session email — read live from the session context]
+**User Input**: "[Complete raw user input - never summarized]"
+**TRACKER ITEM**: "[Complete tracker item (Jira ticket / ADO work item / GitHub issue / local Story ID) that was implemented]"
+**Epic Link**: "[Full Parent Epic URL as a clickable link, from ## Tracker in runtime-artifacts/aire-state.md — or "none"]"
+**AIRE VERSION**: "[Framework version [N] read from the "AIRE Framework Version" line in CLAUDE.md — do not hardcode]"
+**AI Response**: "[AI's response or action taken]"
+**Context**: [Stage, action, or decision made]
+
+---
+```
+
+- **AIRE VERSION**: read at runtime from the canonical "AIRE Framework Version" line in `CLAUDE.md` — this records which framework version the work unit was developed with. Never omit it and never hardcode a literal version.
+- **Epic Link**: the FULL Parent Epic URL read from `## Tracker` in `runtime-artifacts/aire-state.md` (Epic URL line), written as a clickable Markdown link `[EPIC-ID](<site-base-url>/browse/EPIC-ID)` for JIRA/ADO/GITHUB. If `## Tracker` records `Parent Epic: none` (or `Type: LOCAL` with no Epic), write `none` — the field itself is never dropped.
+- For a tracker-linked story, write the item as a clickable Markdown link (`[PROJ-XXX](<site-base-url>/browse/PROJ-XXX)` for JIRA, the work-item/issue URL for ADO/GITHUB) — never bare text.
+- For local-only stories (`Tracker ID = —`/`LOCAL`), put the local Story ID (e.g., `Story 1.2 (local — no external tracker)`) in the same field — the field itself is never dropped.
+- This applies to every step's entries: selection prompt/response, automatic In-Development transition, branch creation (or Case B stop), plan approval, per-step generation logs, coverage evidence, review outcome, remediate outcome, and the commit/push/PR result.
+
+## PARALLEL-SAFE STATE — THIS STORY WRITES ONLY ITS OWN FRAGMENT (`common/parallel-work-state.md`)
+
+Several developers run `dev-implement` on different stories at once, each on its own story branch. So
+that their PRs never conflict on the framework's bookkeeping, **this workflow never writes the shared
+`runtime-artifacts/audit.md` or `runtime-artifacts/aire-state.md`**:
+
+- **Every audit entry this file tells you to append to `runtime-artifacts/audit.md` goes to
+  `runtime-artifacts/stories/story-<N.M>/audit.md`** (same entry format, plus `**Unit**: "story-<N.M>"`).
+  Entries logged before the story is chosen (the selection prompt) are held and written there, with
+  their original timestamps, as soon as the story is known.
+- **Every write this file makes to this story's `## Story Tracker` row, its progress or its SH counters
+  goes to `runtime-artifacts/stories/story-<N.M>/state.md`** — the claim (`Ready for Development → In Development`, Start, assignee),
+  the PR URL, `Merged = no`, `Recorded`.
+- This overrides every mention of those two shared paths below. Reads (Doability Gate, "last unit"
+  detection, the Epic "first story" check, resume) use the resolved view — shared files plus every
+  fragment on the branch (`common/parallel-work-state.md` Section 4).
+- **State Isolation Check before every commit** (Section D Step 2, and any `fix(ci)` commit):
+  every changed path under `runtime-artifacts/` must be inside `runtime-artifacts/stories/story-<N.M>/`;
+  anything else is moved into the fragment and the shared file restored to the merge-base
+  (`common/parallel-work-state.md` Section 5.5).
+
+---
+
+## Step 1 — Keyword Behavior (on invocation)
+
+1. **Read `## Branching`** from `runtime-artifacts/aire-state.md` (Base Branch + Epic Branch). If missing, run `common/branching-strategy.md` Section 1 now (create the epic branch) before proceeding.
+1.5. **No bulk STATUS reconciliation here (by design)**: dev-implement does NOT promote any story's status at the start of a run — it never moves a story to `Ready for Testing` in the Story Tracker or the external tracker, for any story, ever (that is `ve-list-work`'s job alone). It never merges a PR either — merging is always the user's own manual action. Dependency readiness is then verified live, per prerequisite, inside the Doability Gate (Step 2 below → `implementation/story-selection.md` Step 4) at the moment a story with `requires` is picked:
+   - Each prerequisite's PR is checked directly (`gh pr view <PR> --json state,mergedAt,baseRefName,isDraft,reviewDecision,mergeable,mergeStateStatus,author,reviews`) unless its Story Tracker `Status` already reads `Ready for Testing`.
+   - **Merged (or already `Ready for Testing`)** → that prerequisite is doable; proceed.
+   - **Anything else — OPEN (approved or not), draft, conflicted, blocked by checks, CLOSED (not merged), or no PR yet** →  the Doability Gate BLOCKS with a clear message naming the unmerged prerequisite and its PR, and the run STOPS — no story/tracker status is changed by dev-implement itself. `dev-implement` never merges the prerequisite's PR itself, not even an already-approved one — merging is always the user's own manual action; when the PR is already approved the stop message says so, so the user knows merging it is all that's left.
+   The Story Tracker/tracker status is moved to `Ready for Testing` only when ve runs the `ve-list-work` skill on the epic branch — it lists the stories whose PRs have merged and promotes the ones ve confirms it has finished testing.
+1.7. **SINGLE-SESSION EXECUTION (MANDATORY — on EVERY invocation, before Story Selection)**: `dev-implement` runs from start to finish in the session where the user typed it. It never forks itself and never delegates any part of the run to another execution context.
+   - **Never delegate** the workflow or any step of it — story selection, branching, baselines, planning, code generation, any gate, the Code Review pass, the J1/J2 judging, remediation, manifest reconciliation, the commit, the preflight, the push, the PR, the attestation or the PR review — to an Agent-tool fork, a general-purpose / Explore / Plan subagent, the Workflow tool, a background or remote agent, a second Claude Code session, or a `claude -p` subprocess. Every one of those steps is performed by this session's own tool calls.
+   - The `agents/*.md` files this workflow loads (`code-security-review-agent.md`, `ve-implement-agent.md`, `playwright-implement-agent.md`) are procedures executed inline in this session, never spawned as subagents. The Code Review pass (Section A) is kept read-only by discipline — no `Edit`/`Write` on `src/**` or `tests/**` during that pass — never by spawning a read-only subagent. The skills this workflow invokes (`ve-implement`, `playwright-implement`, `pr-generator`, `pr-review`) run inline via the Skill tool.
+   - Long-running suites run through this session's own shell. A command may run in the background only if this session waits for it to finish and reads its result before advancing — no gate ever advances on a result it has not read.
+   - **The ONE permitted Agent-tool use** is Playwright's own official Planner / Generator / Healer test agents, invoked by the `playwright-implement` skill inside Step 6.7, one call at a time, synchronously, with this session waiting on each. They are Playwright's installed test agents, not a fork of this workflow, and nothing else in the run may be handed to them.
+   - **If this run is itself executing inside a fork or a subagent** (its own instructions say it is a fork or a subagent, tell it to "execute directly" / not to spawn agents, or the Agent tool is unavailable to it) → HALT NOW, before Story Selection, for every story — backend-only included. Change nothing (no tracker move, no branch, no baseline) and output:
+     ```
+      dev-implement MUST RUN IN YOUR OWN SESSION
+        This run is executing inside a [fork | subagent]. dev-implement never runs delegated —
+        every step, from story selection to the PR, happens in the session you typed it in.
+        Nothing was changed: no story was claimed, no branch was created, nothing was committed.
+     Type dev-implement in your main Claude Code session.
+     ```
+     Record the halt in `runtime-artifacts/audit.md`.
+   **A fork is NEVER a reason to hand-author Playwright specs** (`implementation/code-generation.md` Step 11d, Part B catch-all). Observed in a real run: `dev-implement` inside a fork silently hand-authored five `.spec.ts` files instead of halting, producing a "passing" gate that never exercised a browser — which is why a fork now halts the whole run up front instead of only the UI gate.
+1.75. **Sequential-development banner (MANDATORY — show on EVERY invocation, before Story Selection)**: display this note to the user verbatim, then continue:
+   ```
+   Note: stories are NOT to be developed in parallel in this session — dev-implement builds ONE story at a time, sequentially (each story branch is cut from the epic branch).
+   To develop stories in parallel, open a NEW folder/clone of this same repo, check the Dependency Graph, and run dev-implement there on an INDEPENDENT story.
+   ```
+1.8. **RESUME AFTER A HALT OR PAUSE (MANDATORY — before Story Selection)**: a `PAUSED —` record (a Playwright agent install needing a session restart — from Playwright Readiness, Step 4.3, or the Step 6.7 safety net) → continue the story at the step it names, skipping everything already done — no change check is needed. Otherwise, if a story in this clone has a `HALTED —` record in its `## Progress` (`runtime-artifacts/stories/story-<N.M>/state.md`) — a self-healing limit (SH-4 / SH-5) or a tool-installation halt from an earlier run — and its story branch is checked out (or it is the only halted story), this invocation is the developer **handing the work back**: follow the resume protocol in `common/self-heal-limit-guidance.md` Section 4 — announce the resume, check what the developer changed (nothing changed → re-show the Self-Heal Limit message and stop; a forbidden shortcut → list it and stop; otherwise continue), skip Story Selection, branch creation and the baselines, grant the halted loop a fresh 3-attempt budget, never revert the developer's changes, and re-run from the first code gate (Step 6) — or from the halted gate for declaration-only changes — through every later gate to Section F. More than one halted story and none checked out → list them and ask which one to resume (a halt, not a gate). No halted story → continue to Step 2.
+2. **Story Selection + Doability Gate**: execute `implementation/story-selection.md` in full — it asks which story (Story ID / number, title, or Tracker ID), reads it from the local Story Tracker / `stories.md` (or resolves the Tracker ID), runs the Doability Gate (which only ever reads PR state — it never merges a prerequisite's PR itself, not even an already-approved one), and moves the story from `Ready for Development` to `In Development` automatically (picking the story is the claim — the tracker and the Story Tracker are both updated without asking, the transition verified for non-LOCAL, and the issue is assigned to the operator who invoked `dev-implement` per `common/tracker-sync.md` Section 5, verified, non-blocking on failure). Do NOT re-implement the prompt or the gate here.
+3. **Story Branch checkpoint (MANDATORY — immediately after story selection)**: In the SAME interaction where the story is chosen, create the story branch per Step 1.5 below. Do NOT begin Code Generation until the story branch is created and active.
+4. Only once the Doability Gate passes and the story branch is active and the BASELINE regression has been captured (Step 1.5 Item 4.5), proceed with Code Generation (Part 1 Planning → Part 2 Generation → unit tests to `unitTestCoverageMin` coverage → FULL regression vs baseline).
+
+---
+
+## Step 1.5 — Story Branch checkpoint (MANDATORY)
+
+Runs after Story Selection resolves the story (Doability Gate passed, story marked `In Development` on BOTH the external tracker and the fragment, assignee set, and the fragment's `## Claim` block written from the verified calls — `implementation/story-selection.md` Steps 5–6; no `## Claim` block, no branch) and before Code Generation Part 1. Execute `common/branching-strategy.md` Section 3 — Story Branch Creation in full. Summary (the strategy file is authoritative):
+
+1. **Log the prompt** in `runtime-artifacts/audit.md` (ISO 8601 timestamp) before asking anything.
+2. Derive the branch name automatically — `story/<N.M>-<kebab-case-story-title>` (Tracker ID prefixed when present and non-LOCAL) — and create it without asking. **No confirmation, no override prompt**: the name is fully determined by the story ID + title. Announce it (`Story branch: <name> (cut from <epic-branch>)`). On a name collision, append a short disambiguating suffix automatically and announce that too.
+3. **Refresh the epic branch** (`git fetch origin && git checkout <epic-branch> && git pull --ff-only`), then run the dependency-merge check on the story's `requires`:
+   - All prerequisites merged into the epic branch (or none) → cut the story branch from the epic branch (NEVER from main/the base branch).
+   - Any prerequisite NOT merged →  WARN AND STOP with the Case B message from branching-strategy.md Section 3: tell the user to merge the prerequisite's PR into the epic branch first, do NOT create a story branch (there is no alternative base), revert the story to `Ready for Development` (external tracker, verified), delete the uncommitted fragment `runtime-artifacts/stories/story-<N.M>/` (nothing of it was committed), print the held audit entries in the stop message (`common/parallel-work-state.md` Section 5.1 — never into the shared `audit.md` from this checkout), and END this `dev-implement` run — the user re-invokes it after merging.
+4. **Record in runtime-artifacts/audit.md**: the story branch name, the base it was cut from, and the user's raw responses.
+4.5. **BASELINE Regression Run (MANDATORY, AUTOMATIC — BEFORE any code is generated)**: on the freshly cut story branch, run the ENTIRE repo test suite (not just this story's area) and save the raw runner output to `reports/unit-test-evidence/story-[N.M]/baseline-regression.log`. Record the pass/fail counts and the full list of failing tests in runtime-artifacts/audit.md. This is the reference point the post-implementation regression gate is diffed against. No user prompt — capture it and continue.
+   - Any failures here were already present on the epic branch (introduced by a PREVIOUSLY MERGED story, not this one). Logging them in `baseline-regression.log` is all that is required — do not try to fix them, and do not block on them. They exist only to define what "already broken" means, so the post-implementation gate can tell this story's breakage apart from everyone else's.
+   - If the repo has no test suite at all, record that explicitly in runtime-artifacts/audit.md — the post-implementation gate then covers only this story's new tests.
+4.6. **BASELINE STATIC EVAL RUN (MANDATORY, AUTOMATIC — same moment, BEFORE any code is generated)**: on the same freshly cut story branch, run the Static Eval Gate checks D1–D7 per `common/eval-framework.md` Section 2 (lint, type check, SAST, dependency vulnerabilities, licences, complexity, secrets) and save the raw output to `reports/eval-evidence/story-[N.M]/static/baseline/`. No user prompt — capture it and continue.
+   - Exactly like the baseline regression: every finding here is pre-existing debt on the epic branch, NOT this story's. Record it and move on — do NOT fix it and do NOT block on it. It exists only to define "already broken" so Step 6.6 can tell this story's findings apart.
+   - **BOOTSTRAP FIRST (eval-framework.md Section 2.3, MANDATORY — same step, immediately BEFORE the baseline run)**: for every check with **no config in the repo**, create the minimal *recommended* config (eslint/ruff/golangci, tsconfig/mypy, `.gitleaks.toml`, the linter's complexity rule at the `tests/.evals/config.json` threshold) so the check is actually runnable. **A check whose config exists is used AS-IS** — the repo's own standards win, never overridden or "upgraded". Announce every file created and log it in runtime-artifacts/audit.md (`bootstrap` block of `eval.json`) — it adds files to the user's repo, so it is never silent; those files commit with this story. **AND INSTALL THE TOOLS — retried, never skipped (Section 2.4.1)**: for every gate, work the chain *already present → package manager → alternative installer → **OCI image via Podman***, 3 attempts per rung, verifying each install with a version command. Recording a gate `N/A` for a missing tool **before the Podman rung has been tried** is a bootstrap failure, not an `N/A`. If the whole chain is exhausted, **HALT with the per-rung report** — never continue with an unmeasured gate, and never phrase deferred setup as `N/A` ("not wired yet", "not installed", "not enabled yet" — all ERROR, Section 2.5.2).
+
+**A MISSING TOOL IS NEVER A QUESTION.** Observed in a real run: the workflow reached D1/D5/D6 with no linter, licence scanner or complexity tool configured for the stack, and asked the user *"How should I handle the remaining static-eval gaps?"* with a recommended option. That is a double violation — this workflow asks nothing after the story key, and a tooling gap already has a defined answer: run the Section 2.4.1 bootstrap chain (already present -> package manager -> alternative installer -> OCI image via Podman), 3 attempts per rung. If the whole chain is exhausted, HALT with the per-rung report — which is a halt, not a question, and never a proposal to skip the gate. Emit it as the "A check can't run" message in `common/self-heal-limit-guidance.md` Section 5 (what was tried per rung, the install command to run by hand, how to hand the work back) and record the halt in `## Progress` so the resume protocol picks it up. Never ask the user to choose between closing a gate and deferring it; deferring is not on the menu (Section 2.5.2).
+     - **ORDER MATTERS**: bootstrap → baseline → generate code → Step 6.6 → diff. A config created AFTER the baseline would make the baseline and the post-change run measure under different rules, so every finding it surfaces on pre-existing code would be blamed on this story. Never bootstrap later than this point.
+     - Recommended presets, never strict/all, and never a config that pre-suppresses findings (no seeded rule-offs, no source-tree excludes) — bootstrap makes the check runnable, never makes it pass.
+   - A check is recorded `N/A` only after the full Section 2.4.1 install chain — including the Podman image rung — has been attempted and recorded, and only for a reason on the Section 2.5.1 closed list (inapplicable to this stack / to this work unit / no such tool exists). If the chain is exhausted, that is an ERROR: HALT with the per-rung report — never `N/A`, never silently skipped, and never phrased as deferred work ("not wired yet", "not installed", "not enabled yet").
+4.7. **BASELINE PLAYWRIGHT E2E REGRESSION RUN (MANDATORY, AUTOMATIC — same moment, BEFORE any code is generated)**: on the same freshly cut story branch, run the ENTIRE existing `tests/e2e/` Playwright suite — every spec earlier stories already shipped (this story has none yet) — and save the raw output to `reports/playwright-test-evidence/story-[N.M]/regression/playwright-baseline-regression.log` plus the mandatory machine-readable `playwright-baseline-report.json`. No user prompt — capture it and continue.
+   - **Why this exists**: it is the UI counterpart of Item 4.5. Step 6.7 only ever proves this story's own new specs pass; nothing else in the run proves this story did not break a browser flow an earlier story already shipped. Without a pre-change photograph there is no way to tell "this story broke it" from "it was already red".
+   - **Applies to EVERY story, UI or not — do NOT skip it because this story touches no UI.** A backend handler, a changed API response shape, a renamed field, a migration or a dependency bump is exactly what silently breaks an existing browser flow, and that is the case this baseline exists to attribute correctly.
+   - **Start the app the same way Step 6.7 does** — the `startCommand`/`readinessUrl` recorded in `tests/.evals/config.json` `ci.playwright` (plus `backendStartCommand`/`backendReadinessUrl` when the local gate needed two processes), resolved from the project's own scripts, never invented. Poll readiness first; tear the server(s) down on every exit path.
+   - **Run headless.** A deliberate, narrow carve-out from the `--headed` rule that governs Step 6.7: that rule exists so the developer can *watch* the specs being authored for the story in hand. This is a bulk sweep of already-approved specs nobody watches, so headless is the default here, for speed. Record `"headed": false, "reason": "bulk regression sweep, not the authoring gate"` in the evidence manifest.
+   - **Failures here are pre-existing** — logged, never fixed, never blocking, exactly like Item 4.5's. They exist only to define "already red" so Step 6.8 can attribute correctly.
+   - **`N/A` only when there is genuinely nothing to regress**: `tests/e2e/` holds no spec files at all (no earlier work unit generated any). Record the reason explicitly — never a silent skip, and never `N/A` merely because *this* story has no UI.
+   - **Specs exist but Playwright is not installed on this machine** (a fresh clone, a new developer): install it now — the project's dependencies (`npm ci` or equivalent, which brings `@playwright/test` when it is a dev dependency) and the browsers (`npx playwright install`) — announced, never asked, then run the sweep. A missing runner or browser is never a reason for `N/A`; only an empty `tests/e2e/` is. The official test agents are not needed for this sweep.
+4.4. **Install the work-unit guard (MANDATORY, automatic)** on the freshly cut story branch: `sh aire-workflow/templates/hooks/check-work-unit.sh --install story-[N.M]` (`common/work-unit-artifacts.md` Section 6.2). Log the result.
+5. Carry the story branch forward — it is the target branch for the commit/push/PR step after review. Do NOT proceed to Code Generation until the branch is created and confirmed active (`git branch --show-current` matches).
+
+> **Multiple developers**: Each dev independently runs `dev-implement` and selects a different ready story. The Dependency Graph (`requires` on each story) plus the Doability Gate ensure no two devs pick stories with unresolved dependencies.
+
+> **Design context**: The system-level design artifacts (functional/NFR/infrastructure) live under `spec/plans/` and apply to every story. Code for the story is written into the application structure defined in Application Design (or code-generation.md's structure rules).
+
+---
+
+# Code Generation (per-story)
+
+**Runs once per story selected via `dev-implement`.**
+
+**Two parts, preceded by Story Selection + Story Branch checkpoint:**
+1. **Part 1 - Planning**: Create a detailed code-generation plan (implement layers, then the mandatory Unit Test & Coverage step).
+2. **Part 2 - Generation**: Execute the approved plan to generate code and artifacts, then generate + run unit tests until coverage is ≥90% (same run).
+
+**Working directory is a manifest fact** for every install, build, lint, test and coverage command in
+this run, the Step 1.5 baselines included: follow the rule in `code-generation.md` Step 11a (resolve
+the root from `ci.roots[]`, `cd` to it fresh, verify its `markerFile`; a missing root is a Manifest
+defect).
+
+**Execution**:
+1. **MANDATORY**: Log any user input during this stage in runtime-artifacts/audit.md.
+2. Load all steps from `implementation/code-generation.md`.
+3. **STEP 0 — Story Selection (MANDATORY)**: Execute `implementation/story-selection.md` in full — it is dependency-aware and self-contained. It asks which story (ID / number, title, or Tracker ID), shows the currently ready stories, runs the Doability Gate (proceed only if every `requires` is confirmed MERGED — already `Ready for Testing`, or live-verified via `gh pr view`; else  STOP the run with a clear message naming the unmerged prerequisite — the gate never merges it itself, even if already approved), and — automatically, no confirmation — moves the chosen story from `Ready for Development` to `In Development` in the Story Tracker + configured tracker (transition verified for non-LOCAL, announced), assigns the issue to the operator who typed `dev-implement` per `common/tracker-sync.md` Section 5 (session email → account lookup, verified, non-blocking on failure), setting `Start`/`Recorded`. If the story is already `In Development`, warn that it may be claimed by another dev. Do NOT re-implement the selection prompt or gate logic here.
+3.5. **STEP 0.5 — Story Branch checkpoint (MANDATORY)**: Execute Step 1.5 — create the story branch from the epic branch (dependency-merge check; on any unmerged prerequisite, warn and STOP per Case B — merge first) and record it in runtime-artifacts/audit.md. This branch is the target for the commit/push/PR step after review. Do NOT start Part 1 until the branch is active.
+4. **PART 1 - Planning**: Create the code-generation plan with checkboxes — implementation steps per layer, ending with the mandatory Unit Test & Coverage step. **GROUND THE PLAN in the previously generated docs**: every plan step MUST trace back to the story's acceptance criteria, `epic-brief.md`, `requirements.md`, and the design artifacts under `spec/plans/` + Application Design — never invent scope, files, or behavior not backed by those documents. **DESIGN REFERENCE GROUNDING (`common/design-reference-grounding.md` Rule DR-5 — automatic, adds NO question and NO gate)**: execute `code-generation.md` Step 1.5 silently — read the `### Reconciliations` table first (**DR-8**: points already decided against a reference by an earlier design stage are settled — follow the framework's design docs there and never reintroduce an excluded capability), then re-open every registered design reference in `runtime-artifacts/aire-state.md`'s `## Design References` that covers a component this story builds (a fresh read for THIS story's scope; "read in an earlier stage" does NOT count) and ground only the unreconciled points, and state per component either `Design reference: <path> — grounded (...)` or `Design reference: none covers this component`. Then execute `code-generation.md` **Step 1.6**: when UI/UX Mockups is enabled and the story has frontend work, apply `common/ui-ux-design-standards.md` (tokens, accessibility, responsive behaviour, UX patterns) to the frontend code, and state the standards line in the plan. On an unreconciled prototype/AC mismatch, apply **DR-6**: follow the design, say plainly in the plan what differed, amend the AC to stay truthful, record the reconciliation, and continue — it is stated plainly in the announced plan and in runtime-artifacts/audit.md; do NOT halt or ask. **REQ-ID THREAD (`common/requirements-traceability.md` Rule 5)**: resolve the story's `Covers` REQ-IDs and read their text in `requirements.md` (the requirement, not just the AC restatement, is planning input), tag every plan step with the REQ-ID(s)/AC(s) it implements, and pass the trace completeness self-check (every covered REQ-ID and every AC in ≥1 step — blocking, fixed silently) BEFORE announcing the plan.
+
+4.1. **WRITE THE PLAN TO DISK (MANDATORY — `code-generation.md` Step 4, NOT optional, NOT satisfied by narrating the plan in chat or in audit.md)**: save the complete, finalized plan as its own file at `spec/spec-generation/story-N.M-code-generation.md` — numbered steps, checkboxes, story context/dependencies, and the REQ/AC trace summary. A plan that exists only as chat output or as an audit.md log entry does NOT satisfy this step — the file on disk is the single source of truth Step 10 (Part 2) reads from and the one every step's `[x]` checkbox is marked against. Verify the file exists on disk (re-`Read` it back) before proceeding to 4.2 — do not proceed on the assumption that "announcing" the plan wrote it.
+
+4.2. **Announce the plan and execute it immediately — there is NO approval gate.** Log it in runtime-artifacts/audit.md under a plain heading (e.g. `## Code Generation Part 1 — Plan Finalized (auto-approved, no gate)`) with the path to the saved plan file (`spec/spec-generation/story-N.M-code-generation.md`), the step count and the REQ/AC trace summary, per `code-generation.md` Steps 4 and 6. Never ask "Approve this plan?" and never write "GATE" into the heading.
+4.3. **PLAYWRIGHT READINESS (MANDATORY WHEN the plan is frontend — automatic, before any code)**
+
+**Applies only when this story's code-generation plan (Step 4.1) contains a _Frontend Components Generation_
+step** — the plan is the single place that decides whether a work unit is frontend. No such step →
+record `Playwright readiness: N/A — no Frontend Components Generation step in the plan` and continue.
+Otherwise, before any code is written, make Playwright fully ready — **automatically, announced, never
+asked**:
+
+1. **Runner**: `@playwright/test` is in the project's dev dependencies — if not, add it with the project's
+   own package manager (`npm i -D @playwright/test`, `pnpm add -D @playwright/test`, `yarn add -D
+   @playwright/test`). A missing `playwright.config.*` is fine here — the Generator creates or extends
+   it at the UI gate (`extensions/testing/playwright-automation/playwright-automation.md` Step 0a;
+   root = workspace root, `testDir: tests/e2e`).
+2. **Browsers**: `npx playwright install` (add `--with-deps` on Linux) when the browsers are not already
+   present on this machine.
+3. **Playwright's official test agents**: `.claude/agents/playwright-test-planner.md`,
+   `playwright-test-generator.md`, `playwright-test-healer.md` and the `playwright-test` entry in
+   `.mcp.json`. Missing → back up `.mcp.json`, run `npx playwright init-agents --loop=claude`, then merge
+   the other MCP servers back (`init-agents` overwrites the file — playwright-automation.md Step 0a) and
+   announce the merged server list. No confirmation is asked: the announced code-generation plan's
+   Playwright Readiness step is the authorisation (the extension's confirm-first applies to standalone
+   `/playwright-implement` only).
+4. **Verify**: `npx playwright --version` succeeds, the three agent files exist, the `.mcp.json` entry
+   exists. Record what was installed in the audit trail and in the plan's Playwright step.
+5. **Session restart — only if step 3 ran.** Claude Code loads MCP servers when a session starts, so newly
+   installed agents cannot be used until the session restarts. Record
+   `PAUSED — Playwright agents installed — resume at Step 4.5 — <timestamp>` in the work unit's
+   `## Progress` and emit, as the run's last output:
+   ```
+   Playwright is now set up for this frontend story.
+      Installed:  <what was installed>
+      One step is needed: restart Claude Code so it loads Playwright's test agents, then type dev-implement.
+      (When epic-enhance or epic-bugfix run this step, the keyword shown here and used to resume is theirs.)
+      I will continue from Step 4.5. The plan and the baselines are kept, and no code has been
+      written yet.
+   ```
+   Typing `dev-implement` in the new session finds the `PAUSED —` record and continues at Step 4.5, skipping
+   everything already done. Everything already installed → no pause.
+6. **Install fails** after the full install chain → emit the "A check can't run" message
+   (`common/self-heal-limit-guidance.md` Section 5) for Playwright, record `HALTED —`, nothing changed.
+
+Because this runs here, the Playwright UI gate (Step 6.7) finds Playwright ready; its own install
+handling remains only as a safety net.
+
+4.5. **VERIFY THE STORY'S BEHAVIOUR SPEC (MANDATORY — before any code)**: `spec/behavior/story-[N.M].feature` was already written and approved at the STOP CHECKPOINT (`CLAUDE.md` Step 1.7 / `implementation/specs-and-test-plans.md`) — this step READS it, it does not author it. Confirm the file exists, parses, and carries one `@AC-n`-tagged scenario per acceptance criterion of this story. **Present → backfill only if genuinely absent**: if the file is missing (legacy project, or a story added after the checkpoint), write it now per `common/behavior-spec.md` Section 2 and announce the backfill explicitly (`Behaviour spec for Story [N.M] was missing from the approved set — generated now at spec/behavior/story-[N.M].feature`). NEVER rewrite an approved scenario to match the code you are about to generate — the spec is the contract, and code that cannot satisfy it is the thing that changes. A genuine spec defect is raised with the user, amended, and logged; it is never silently edited. That is still the ONLY spec file this story gets. No per-story requirements, architecture, constraints or deep-dive document — the agent reads the tracker item + `stories.md` for ACs, `requirements.md` for the `Covers` REQ-IDs, `spec/plans/architecture.md` for design constraints, and `tests/.evals/config.json` for thresholds. Announce the file path and the scenario/AC counts; log the verification (or backfill) in runtime-artifacts/audit.md.
+5. **PART 2 - Generation**: Execute the announced plan for this story, writing all application code into `src/` (or the recorded `## Code Root` for a brownfield repo — `common/directory-structure.md`) and nothing into `spec/`. **TESTS GO IN THE REPO-ROOT `tests/` TREE — NEVER UNDER `src/` AND NEVER UNDER THE CODE ROOT**: unit tests -> `tests/unit/`, Gherkin step definitions -> `tests/behavior/steps/` (the tree `tests/.evals/behavior/run.sh` executes inside Podman), Playwright -> `tests/e2e/`. The `## Code Root` remapping above applies to application code ONLY — a brownfield repo whose code lives in `app/` or `packages/api/src` still writes its tests to the repo-root `tests/`, never `app/tests/` or `packages/api/src/tests/`. This is also what the manifest's `testPaths` records (`common/eval-framework.md` Section 1.1) and what the Podman mount and the coverage gate look at, so a test written anywhere else is invisible to both gates. **PLAN FIDELITY**: implement EXACTLY the plan — no unplanned files, features, refactors, or scope drift; keep the generated code consistent with the design docs the plan was grounded in. If mid-coding you discover the plan must change, revise the plan document, announce the revision (what changed and why) in your output and in runtime-artifacts/audit.md, and continue — do not ask for approval, and never apply a deviation without recording it.
+6. **UNIT TEST & COVERAGE GATE**: execute `code-generation.md` Step 11a for this story (evidence key
+   `story-[N.M]`, `reports/unit-test-evidence/story-[N.M]/`). (SH-LOOP-1; never proceed below
+   `unitTestCoverageMin`.)
+6.1. **BEHAVIOURAL TEST GATE — B1, B2, B3**: execute the gate in `common/behavior-spec.md` Section 6 (the
+   tiers, which feature files are active, last-unit detection by PR merge state, Podman execution,
+   evidence and N/A rules). Step definitions go in `tests/behavior/steps/`, bound to the public surface.
+   Export `AIRE_STORY_KEY=story-<N.M>` for every tier (`podman run -e AIRE_STORY_KEY=<key> …`); without
+   it B1 cannot identify the unit under test and refuses to guess. Evidence:
+   `reports/behavior-test-evidence/story-[N.M]/<b1|b2|b3>/`. Fix the code, never the scenario (SH-6).
+   (SH-LOOP-7 for B1/B2; SH-LOOP-8 for B3, with its own budget.)
+6.2. **API & CONTRACT TESTING GATE** (when the plan has an API Layer Generation step): execute
+   `code-generation.md` Step 11a.5 (tests in `tests/api/`, the endpoint checklist, evidence in
+   `reports/api-contract-test-evidence/story-[N.M]/`). With no such step, record `N/A` with the reason.
+   It does not replace the Verification Engineer's manual API test steps. (SH-LOOP-2.)
+6.3. **TEST PLACEMENT VERIFICATION GATE**: execute `code-generation.md` Step 11a.6; log to
+   `reports/unit-test-evidence/story-[N.M]/test-placement-check.log`. (SH-LOOP-12.)
+6.5. **FULL REGRESSION GATE**: execute `code-generation.md` Step 11b — the whole suite, diffed against
+   Item 4.5's `baseline-regression.log`; only new failures block, each fixed by its cause. Output:
+   `reports/unit-test-evidence/story-[N.M]/full-regression.log`. (SH-LOOP-3.)
+6.6. **STATIC EVAL GATE — D1–D7**: execute `code-generation.md` Step 11c, diffed against Item 4.6's
+   baseline in `reports/eval-evidence/story-[N.M]/static/`; never suppress a finding (SH-6). Writes
+   `eval.json` and `eval-summary.md`. (SH-LOOP-4.)
+6.7. **TEST PLANS + PLAYWRIGHT UI AUTOMATION GATE**: execute `code-generation.md` Step 11d. Part 1 runs
+   for every story: verify the manual test plan approved at the STOP CHECKPOINT, and invoke
+   `ve-implement` in WORKFLOW mode only to backfill a missing one. Part 2 runs only when the plan has a
+   Frontend Components Generation step: `playwright-implement` in WORKFLOW mode, `--headed`. Evidence in
+   `reports/playwright-test-evidence/story-[N.M]/`; the generated artifacts ride this story's commit.
+   (SH-LOOP-11.)
+6.8. **PLAYWRIGHT E2E REGRESSION GATE** (every story, UI or not): execute `code-generation.md` Step 11e —
+   the whole `tests/e2e/` suite headless, diffed against Item 4.7's baseline, output in
+   `reports/playwright-test-evidence/story-[N.M]/regression/`, gate id `playwrightRegression` (local
+   only). Fix the application, never the spec (SH-6). (SH-LOOP-13; the Retry-Limit Report names each
+   newly-red spec.)
+7. **POST-IMPLEMENTATION — status stays `In Development` until the PR has merged and the ve signs it off with `ve-list-work`**: Do NOT change the tracker status here, and do NOT prompt for a board status. The story remains `In Development` through the automated Code Review (Section A), any Remediate loop (Section C), the commit/push/PR raise (Section D), and the automated PR Review (Section E). Raising the PR does NOT promote it. The story moves to `Ready for Testing` only when its PR is MERGED into the epic branch — and ve has signed it off with the `ve-list-work` skill (dev-implement itself only ever live-checks a specific prerequisite's merge state at its own Doability Gate — it never promotes tracker status). The developed ticket is recorded as a full tracker hyperlink in `runtime-artifacts/audit.md`:
+   - **MANDATORY — record the developed ticket as a full tracker hyperlink in `runtime-artifacts/audit.md`**: for a tracker-linked story, resolve the site base URL (`getAccessibleAtlassianResources` for JIRA, or reuse the base already recorded in `spec/`; the work-item/issue URL directly for ADO/GITHUB) and write the ticket as a clickable Markdown link (`[PROJ-XXX](<site-base-url>/browse/PROJ-XXX)` for JIRA, the direct URL for ADO/GITHUB) in the audit entry for this implementation — never bare text. When the PR is raised (Section D) record the PR URL and that the story stays `In Development` (Merged=no); when the PR later merges, record the promotion to `Ready for Testing` with evidence (tests passing + measured coverage % ≥90%). For local-only stories (`Tracker ID = —`/`LOCAL`), record the local Story ID instead. Example entry:
+     Use the audit entry format defined at the top of this file (it already carries TRACKER ITEM, Epic Link and AIRE VERSION).
+8. **Update Dependency Graph**: After a story's PR merges, recompute the ready set — stories whose `requires` are all merged (or already `Ready for Testing`) become selectable.
+9. **MANDATORY**: Present the code-generation completion announcement as defined in `code-generation.md` Step 14 (Code Generation Complete + file summary). This announces completion only — it does NOT ask the user to choose between review and continue anymore.
+10. **AUTO-TRIGGER Code Review (MANDATORY — no longer user-selected)**: As soon as code generation for the story is done, automatically proceed into the Post-Code-Generation Automation section below. Code Review runs on its own; the user is NOT asked whether to run it.
+11. **MANDATORY**: Log every user response in this stage in runtime-artifacts/audit.md with complete raw input.
+
+---
+
+# Post-Code-Generation Automation — Auto Code Review → (Remediate) → Commit / Push / PR
+
+**Runs automatically once Code Generation Part 2 completes for the story. The user is NOT asked whether to review — Code Review is triggered automatically.** The target branch for the commit/push/PR is the branch resolved in Step 1.5 (newly created, or the current branch).
+
+## A. Auto Code Review (MANDATORY, automatic)
+1. **Log** in runtime-artifacts/audit.md that automated Code Review is starting for Story [N.M] (ISO 8601 timestamp).
+2. **Run Code Review for this story**: load and execute `workflows/code-review.md` scoped to this specific story (target = "story [N.M]"), as a read-only review (it MUST NOT edit source). It runs inline in this session (Step 1.7) — read-only is enforced by making no `Edit`/`Write` calls on `src/**` or `tests/**` during the pass, never by spawning a read-only subagent, and the J1/J2 scores in Step 2.5 are judged by this session itself, never by a subprocess or subagent. It produces the versioned report at `reports/reviews/story-[N.M]-code-review-v[X].md`. Code Review does NOT change the tracker status — the story stays `In Development`.
+   - **NO TEST RE-RUN**: the Unit Test & Coverage gate (Step 6) measured coverage on this story's new/changed code to `unitTestCoverageMin`, the API & Contract Testing Gate (Step 6.2, when applicable) ran automated tests against every new/changed endpoint to a full pass, the Playwright UI Automation Gate (Step 6.7, when applicable) ran every generated Playwright spec `--headed` to a full pass, and the Full Regression Gate (Step 6.5) ran the ENTIRE repo suite and diffed it against the Step 1.5 baseline — all in THIS same run, with proof artifacts saved under `reports/unit-test-evidence/story-[N.M]/` (`unit-test-run.log`, `coverage-report.*`, `baseline-regression.log`, `full-regression.log`, `evidence-manifest.md`), when Step 6.2 applied `reports/api-contract-test-evidence/story-[N.M]/` (`api-contract-test-run.log`, `api-contract-test-report.*`, `evidence-manifest.md`), and when Step 6.7 applied `reports/playwright-test-evidence/story-[N.M]/` (`playwright-test-run.log`, `playwright-test-report.json`, `evidence-manifest.md`). Pass that captured evidence into the review — Code Review MUST NOT re-execute the unit tests, re-measure coverage, re-run the API & Contract tests, or re-run the Playwright specs; it verifies test existence/AC coverage statically and cites the stored proof artifacts in its report, rather than restating unverified numbers.
+2.4. **AUTOMATED SECURITY REVIEW (MANDATORY, automatic — inside this review pass)**: the review's Phase 2.5 runs the `agents/code-security-review-agent.md` procedure against this story's diff, checking all 16 Security Baseline rules on the changed files and the attack surface they reach, and writes `reports/code-security-reviews/story-[N.M]-security-review-v[X].md` (keyed by this work unit and the review version — never the dated name, which parallel stories would collide on). Its 🔴 Critical / 🟠 High findings on the changed surface become real `SEC-ISS-XXX` findings in the review's issue list — so they route through Section B exactly like AC findings and are auto-remediated by Section C (SH-LOOP-5) until clean, within its 3-round budget. 🟡/🔵 findings and any pre-existing violation on lines this story didn't touch are advisory only (reported, never remediated here, recommend `/raise-defect`). Never suppress a finding instead of fixing it; never let the security pass go repo-wide.
+2.5. **JUDGE GATES J1 + J2 — BLOCKING (MANDATORY, automatic — computed HERE and nowhere else)**: as part of this review pass, compute the two judge scores per `common/eval-framework.md` Section 4 — J1 Architecture conformance against `tests/.evals/rubrics/architecture-rubric.json` (derived mechanically from `spec/plans/architecture.md` Section 10; apply the Section 3 fallback chain, `N/A` if it bottoms out) and J2 Security (OWASP) against `security-rubric.json` — from this story's diff. Write them with their per-criterion breakdown to `reports/eval-evidence/story-[N.M]/judge/`, merge them into the `gates` block of `eval.json`, refresh `eval-summary.md`, and report both in the review report.
+   - **Scoring discipline** (eval-framework.md Section 4.1): score once per review pass — never re-roll for a better number; score each criterion independently then weight; every criterion below 1.0 MUST cite `file:line` and say what violates it; score only what the diff shows; a criterion this diff cannot exercise is `N/A` and is excluded with the remaining weights renormalised to 1.0 — never scored 0.
+   - **Gate**: `J1 ≥ llmJudgeArchitectureScoreMin` and `J2 ≥ llmJudgeSecurityScoreMin`, both read from `tests/.evals/config.json`. A `J1` of `N/A` passes. **Below minimum → SH-LOOP-6**: remediate the specific criteria that scored below 1.0, worst weighted-loss first, using their citations; re-run whatever gates the fix touched; re-score on the next review pass. Capped at 3 attempts (SH-1); on exhaustion apply SH-4 — HALT and emit the Retry-Limit Report naming each failing criterion, its weight, its citation, and what the three attempts changed.
+   - **Forbidden ways to pass this gate** (SH-6 violations, all of them): editing `spec/plans/architecture.md` Section 10 to weaken or delete a constraint; editing the rubric JSON directly; lowering either minimum in `tests/.evals/config.json`; re-scoring until a run clears the bar; marking an applicable criterion `N/A`. The architecture document changes only when the design decision changed — never because a score did not clear.
+   - Record the pinned judge model and the `rubricVersion` alongside every score.
+3. **MANDATORY — audit the complete review log**: append to `runtime-artifacts/audit.md` the full Code Review outcome — the `**TRACKER ITEM**:` and `**Epic Link**:` fields, report path, review verdict, and the complete list of findings by severity (🔴 Blocker / 🟠 High — the only severities; findings map strictly to unmet/partially-met ACs and requirements), plus any tracker status change. Do not summarize away findings; record the complete log of this automated review.
+4. Proceed to B. Review Decision Gate.
+
+## B. Review Verdict Routing (AUTOMATIC — no question, no gate)
+
+The review's own verdict decides what happens next. **Do NOT present an A/B choice and do NOT wait
+for the user.** Announce the verdict, then route:
+
+```
+Automated Code Review complete for Story [N.M].
+   Report: reports/reviews/story-[N.M]-code-review-v[X].md
+   Verdict: [clean — all ACs Met / findings: Blocker X, High Y]
+[Proceeding to commit + PR. | Findings found — remediating them automatically now (round [n]).]
+```
+
+1. **Verdict clean — zero 🔴, zero 🟠, AND both judge gates PASS (or J1 `N/A`)** → go straight to D. Commit, Push & Raise PR.
+1.5. **Judge gate below minimum** → handled by SH-LOOP-6 inside Section A Step 2.5 before this routing is reached. A run never arrives at Section D with a failing J1 or J2.
+2. **Any 🔴 Blocker or 🟠 High finding** → go to C. Auto-Remediate Loop (SH-LOOP-5). The framework
+   fixes its own findings within a budget of 3 remediation rounds; it hands them back to the user
+   only when that budget is exhausted (SH-4), and then it HALTS instead of raising the PR.
+3. **MANDATORY**: log the routing decision in runtime-artifacts/audit.md under a plain heading
+   (`## Review Verdict — Clean, Proceeding to PR (Story N.M)` or
+   `## Review Verdict — Findings, Auto-Remediating (Story N.M)`), with the full findings list by
+   severity. No "GATE" in the heading, and no user response to record.
+
+## C. Auto-Remediate Loop — SH-LOOP-5 (AUTOMATIC — max 3 rounds)
+
+**Entered whenever the review verdict reports findings. Every round is automatic — no prompts at any
+point. The loop is bounded by the Self-Healing Retry Policy: one round = one attempt, maximum 3.**
+
+1. **Check the SH-LOOP-5 counter BEFORE starting a round.** If 3 attempts have already been spent,
+   do not start another — go directly to Step 8 (Exhaustion) below.
+2. **Log** in `runtime-artifacts/audit.md` that automatic remediation round `[n] of 3` is starting for Story [N.M],
+   naming the review report being remediated, the findings in scope, and the identified root cause of
+   each (SH-3, SH-7).
+3. **Run Remediate**: load and execute `workflows/remediate.md` scoped to this story's review
+   report (`story-[N.M]-code-review-v[X].md`). It fixes findings (fix → unit test → green, running
+   ONLY this story's unit tests) and annotates the report in place. **Its scope-confirmation prompt
+   is SKIPPED in this mode** — every 🔴 and 🟠 finding is in scope by definition, and nothing is
+   deferred. Remediate does NOT change the tracker status — the story stays `In Development`
+   throughout.
+4. **Re-run the FULL regression** (Step 6.5's diff vs `baseline-regression.log`) if the remediation
+   touched non-test code, fixing any NEW failure in the same round. If the remediation touched
+   API-layer code that Step 6.2 covered, also re-run the affected endpoint(s)' API & Contract tests
+   and keep them green. Per SH-2, this re-entry continues the SH-LOOP-3 / SH-LOOP-2 counters — it
+   does not reset them.
+5. **MANDATORY — audit the complete remediate log**: append to `runtime-artifacts/audit.md` the full outcome
+   of the round — the `**TRACKER ITEM**:` and `**Epic Link**:` fields, the round number (`[n] of 3`),
+   which findings were fixed (by severity), the files changed, unit-test evidence, and the regression
+   comparison. Record the complete log, not a summary.
+6. **Re-review automatically**: return to A. Auto Code Review, producing the next report version
+   `v[X+1]`, then B. Review Verdict Routing again.
+7. **Loop control**:
+   - **Verdict clean** → the loop exits successfully → D. Commit, Push & Raise PR.
+   - **Findings remain AND attempts spent < 3** → increment the counter and return to step 1.
+   - **Findings remain AND attempts spent = 3** → exhausted → step 8.
+   - **Stall (SH-5)** — a round produced no code change at all AND the next review returned an
+     **identical** finding set → the loop cannot progress. Treat as exhausted immediately, regardless
+     of attempts remaining → step 8, noting the early end.
+8. **Exhaustion (SH-4) — HALT, do not raise a PR.** When the budget is exhausted (3 rounds, or an
+   SH-5 stall):
+   - Do not run a 4th round, do not commit, do not push, do not raise a PR, and do
+     **not** change the local Story Tracker or the external tracker. The story stays
+     `In Development` and the remediation work stays in the working tree.
+   - Emit the Retry-Limit Report (Self-Healing Retry Policy, above) with `[loop name]` =
+     `Auto-Remediate (code review + security findings)` and `[SH-LOOP-ID]` = `SH-LOOP-5`, listing every
+     unresolved finding with its ID, severity, file:line, and the reason automatic remediation failed
+     on it.
+   - Append the same content to `runtime-artifacts/audit.md` under
+     `## Self-Healing Retry Limit Reached — SH-LOOP-5 (Story N.M)`.
+   - **HALT and wait for the developer to fix it manually and hand it back.** Never silence a finding by deleting it from the
+     report, never weaken the review scope to manufacture a clean verdict, and never let an exhausted
+     loop pass unreported.
+
+## D. Commit, Push & Raise PR (on a clean review verdict) — FULLY AUTOMATIC
+
+**A clean review verdict is the ONLY thing that triggers this section.** An exhausted SH-LOOP-5
+(Section C.8) does NOT reach it — that path HALTS at the gate and waits for the user.
+Everything below — the commit, the branch push, the PR creation, the labels, the tracker update,
+and the auto PR review (Section E) — runs automatically, with no prompts of any kind.
+Do NOT ask about pushing, opening the PR, the PR title/body, or the labels. Announce what you
+are doing; never ask whether to do it.
+
+1. **Log** in runtime-artifacts/audit.md that the review verdict came back clean and the commit/push/PR step is starting, naming the target branch. If SH-LOOP-5 was exhausted instead (Section C.8), this section is NOT reached — the run has already halted.
+1.2. **ARTIFACT COMPLETENESS CHECK — SH-LOOP-16 (MANDATORY, AUTOMATIC — after the clean review verdict, BEFORE manifest reconciliation and the commit)**: run `common/work-unit-artifacts.md` Section 5 for `story-[N.M]`. Build the expected evidence list from Section 1 (the always-required files plus the folders of every gate that ran, read from `eval.json`), then verify each file exists, is non-empty, has its set format (the Section 2 `evidence-manifest.md` skeleton; `eval.json` / `eval-summary.md` per `common/eval-framework.md` Section 6; the review and security report templates) and agrees with the others (Section 4) — including that no folder exists for an `N/A` gate (so `b3/` only on the last unit). A file whose underlying output exists is written or reformatted from that real output; a missing underlying output means the gate never produced evidence, so that gate's step is re-run — never hand-written. Record the result in `reports/eval-evidence/story-[N.M]/artifact-check.md`. Capped at 3 attempts; on exhaustion HALT with the Self-Heal Limit message. Nothing is committed until this check is clean.
+1.5. **MANIFEST RECONCILIATION — CONDITIONAL on `## CI/CD Configuration` `Enabled: Yes` (MANDATORY, AUTOMATIC when it applies — after local gates pass, BEFORE the commit)**: if `Enabled: No`, SKIP this step entirely — there is no CI manifest to reconcile when no pipeline was generated — and go straight to Step 2 (Commit). Otherwise:
+   per `common/ci-pipeline-generation.md` Section 4.0f, write ONE NEW file,
+   `tests/.evals/ci-manifest.d/story-[N.M].json` — a JSON array of `ci.roots[]`-shaped entries for every
+   root this story's own run established or extended, populated from what Steps 4.6/6/6.6/11a–11c
+   **already executed for real** (never re-derived, never guessed): the resolved `root` (matching
+   `## Code Root`), `stack`, `runtimeVersion`, `markerFile`, the install/build/coverage commands that
+   actually ran, `coverageReportPath`/`coverageFormat`, `noTestsExitCode`, `tools` paired with
+   `toolInstallCommands`, `dependsOn` (roots this one consumes — read from the repo's own dependency
+   declaration), `toolchainSetup` (only for a stack outside the built-in five), and the
+   `sourcePaths`/`testPaths` this story's own diff touched. **The COMPLETE entry, per Section 4.0f's
+   field table** — `tools` without `toolInstallCommands` is a hard Manifest defect, and an omitted
+   `dependsOn` silently disables monorepo diff-scoping. Append-only — extend an existing root's
+   arrays (tools/sourcePaths/testPaths/installCommands), never remove another root's or another
+   fragment's entry, and never edit `tests/.evals/config.json` or any other work unit's fragment file
+   directly (Section 4.0f.1 — this is what keeps two parallel `dev-implement` sessions, Step 1.75,
+   conflict-free on CI configuration specifically). If this story's stack tools conflict with an existing
+   pin on the same root from an earlier fragment (e.g. two different `semgrep==` versions), surface the
+   conflict to the user and confirm which pin wins before writing — never silently union or "last wins".
+   Re-run `tests/.evals/scripts/validate-pipeline.{sh,ps1}` after writing the fragment (it re-derives the
+   merged view) and confirm it still passes before proceeding to the commit below. Include the fragment
+   in the same commit as the story's code.
+2. **Commit the story's changes to the target branch**:
+   - Verify the active branch is the target branch from Step 1.5 (`git branch --show-current`). If it is not, switch to it automatically and announce the switch (no confirmation — the target branch was determined by this run).
+   - Stage and commit the generated/remediated application code, the Step 6.7 Playwright artifacts when that gate applied (`tests/e2e/<story-slug>/`, `spec/playwright-specs/<story-slug>.md`, any confirmed `seed.spec.ts` addition, `spec/test-plans/<TICKET-ID>-<title>/automation-summary.md`), plus the Step 1.5 manifest fragment (`tests/.evals/ci-manifest.d/story-[N.M].json`, if one was written), plus this story's state fragment (`runtime-artifacts/stories/story-[N.M]/`), plus any files Playwright Readiness added (the package manifest and lockfile, `playwright.config.*`, `.claude/agents/playwright-test-*.md`, `.mcp.json`), — do NOT commit unrelated changes, and **never the shared `runtime-artifacts/audit.md` / `aire-state.md`**: run the State Isolation Check (`common/parallel-work-state.md` Section 5.5) on the staged set first and commit only when it is clean. The commit message MUST carry an `AIRE-Version:` trailer as the framework signature, where `[N]` is read at runtime from the "AIRE Framework Version" line in `CLAUDE.md` (do not hardcode a number). Use a clear message, e.g.:
+     ```
+     git add <story files>
+     sh aire-workflow/templates/hooks/check-work-unit.sh story-[N.M]
+     git commit -m "[Story N.M / TRACKER-ID] <concise summary of the implemented story>" -m "AIRE-Version: [N]"
+     ```
+     The guard must print `every gate PASS or legitimate N/A, evidence complete` before `git commit` runs
+     (and the hook repeats it on the commit). A refusal means a gate or its evidence is missing: go back
+     and run it (Section D Step 1.2's loop). Never `--no-verify`.
+     The `AIRE-Version: [N]` trailer goes on its own line at the end of the message body (alongside any existing trailers), with `[N]` substituted from the CLAUDE.md canonical line.
+   - Record the commit hash in runtime-artifacts/audit.md.
+2.2. **PULL THE EPIC BRANCH BEFORE PUSHING (AUTOMATIC)**. Another story may have merged into the epic
+   branch since this branch was cut, and may have touched the same files even when the dependency graph
+   marks the two as independent.
+   1. Run `git fetch origin <epic-branch>`. If the branch already contains it
+      (`git merge-base --is-ancestor origin/<epic-branch> HEAD`), go straight to Step 2.5.
+   2. Otherwise run `git merge --no-ff origin/<epic-branch>`. Never rebase, never force-push.
+   3. **On a conflict, keep both functionalities.** The other story's code and tests and this story's
+      changes must all survive, for example both routes, both config entries, and both stories' tests.
+      Never take one side wholesale, and never delete or weaken the other story's code or tests. If the
+      two genuinely cannot be combined, run `git merge --abort` and continue with Step 2.5 as normal.
+   4. When the merge completed, run the full test suite once on the merged result. A new failure is fixed under the existing
+      full-regression loop (SH-LOOP-3, on its current counter).
+   5. Commit the merge (and any fix) through the guard, with the `AIRE-Version: [N]` trailer. Log the
+      merged epic commits and how each conflict was combined in this story's audit fragment.
+2.5. **CI PREFLIGHT GATE — SH-LOOP-9 — CONDITIONAL on `## CI/CD Configuration` `Enabled: Yes` (MANDATORY, AUTOMATIC when it applies — after the commit, BEFORE the push and the PR)**: if `Enabled: No`, SKIP this gate entirely — there is no CI pipeline to preflight — and go straight to Step 3 (Push & raise the PR). Otherwise:
+   `common/ci-pipeline-generation.md` Section 4.0i is the authoritative contract; execute it in full.
+   This gate exists because every local gate above ran in this agent's ambient environment, where the
+   Step 1.5 Item 4.6 bootstrap had already installed the eval tools and the test dependencies were already
+   importable — while CI starts from a bare runner and provisions only what the manifest declares.
+   A gate CI cannot run measures nothing, and a story whose PR fails on `tool 'ruff' … is not installed on
+   this runner` or `RuntimeError: … requires the httpx package` has spent a full CI run, a full self-repair
+   triage and a round-trip back to this workflow without a single line of its code being examined.
+   **Fix it here, on this machine, where it costs one clean-room run.**
+   1. **P1 — Declaration completeness (static, first, cheap)**: against the merged manifest
+      (`tests/.evals/_run/merged-manifest.json`, or re-derived exactly as `run-static-evals.*` derives it),
+      for every root this story's diff touches: every gate in `ci.gates` resolves to a binary named in some
+      root's `tools` with a matching `toolInstallCommands` entry; `semgrep` (D3) and `gitleaks` (D7) are
+      declared; and the full Section 4.0f field table is present — `installCommands`, `coverageCommand` +
+      `coverageReportPath` + `coverageFormat`, `markerFile`, `runtimeVersion`, `noTestsExitCode` (or a
+      no-tests-safe runner flag), `dependsOn`, `toolchainSetup` where the stack needs it, and
+      `sourcePaths`/`testPaths` that actually match this story's changed files.
+   2. **P2 — Clean-room execution of the REAL CI entrypoints**: in a disposable environment built per
+      `common/ci-pipeline-generation.md` Section 4.0.1a (fresh venv / empty `node_modules` / throwaway
+      Podman container from the runner's base image) — **never this agent's ambient shell, and never with
+      an install the manifest does not declare** — run, with
+      `BASE_SHA="$(git merge-base origin/<epic-branch> HEAD)"`:
+      `ci-manifest-runner.sh install` → `build` → `run-static-evals.sh` → `ci-manifest-runner.sh coverage`.
+      **The commit in Step 2 above is why this runs here and not before it**: every entrypoint is
+      diff-scoped (Section 4.0g), so with the story's changes uncommitted every root scopes out and the
+      whole preflight reports `N/A` — clean-looking and worthless.
+   3. **P3 — Behavioural provisioning**: if Step 6.1's tiers genuinely ran containerised from the
+      committed `Containerfile`, that already IS clean-room evidence — **cite that run's evidence manifest
+      (image ref + digest) and do NOT re-run it.** Re-run only if that gate fell back to its one permitted
+      native exception, or if this story changed the `Containerfile`, `run.sh`, the step-definition
+      dependencies, or anything the image installs.
+   4. **FAIL on any of** (Section 4.0i.2): `is not installed on this runner` · `command not found` ·
+      `ModuleNotFoundError` / `ImportError` / `requires the <pkg> package` / `Cannot find module` ·
+      a dependency-resolution failure or non-clean `pip check` · a marker in
+      `tests/.evals/_run/manifest-defects.txt` · a missing `cd` target or `markerFile` · a gate reporting
+      `N/A` or zero analysed files on a root this diff touched · a gate reporting the qualified pass
+      ("zero output at BOTH ends") on a root this diff touched.
+      **Not a preflight failure**: a gate reporting a real finding, or a test legitimately failing — those
+      return to SH-LOOP-1…4 on those loops' existing counters (SH-2), never onto this one.
+   5. **Repair the DECLARATION, never the gate** (Section 4.0i.3): a missing eval tool → this story's own
+      fragment `tests/.evals/ci-manifest.d/story-[N.M].json` (`tools` and `toolInstallCommands`, pinned;
+      never another unit's fragment, never `config.json`); a missing runtime/test dependency → the **repo's
+      own dependency declaration** (its real test/dev group) plus `installCommands` if that group is not
+      already installed — never a bare `pip install`/`npm i -g` inside the workflow YAML or a script.
+      Re-run `validate-pipeline.{sh,ps1}`, commit the fix (`fix(ci): preflight — <what>` with the
+      `AIRE-Version: [N]` trailer), and re-run P1–P3 from the top.
+      **Forbidden ways to pass this gate (SH-6)**: removing the gate from `ci.gates`, deleting a tool
+      from `tools`, marking an applicable gate `N/A`, excluding the failing root from `sourcePaths`,
+      skipping the failing test, or adding an ignore-list entry. **Preflight makes the pipeline runnable;
+      it never makes it pass.**
+   6. **Loop control — SH-LOOP-9, capped at 3 attempts (SH-1)**. Log each attempt per SH-3 (root cause,
+      planned fix, files changed, exact command re-run, result). On exhaustion or an SH-5 stall apply
+      **SH-4: HALT** — do not push, do not raise the PR, do not change any tracker — and emit
+      the Retry-Limit Report with `[loop name]` = `CI Preflight` and `[SH-LOOP-ID]` = `SH-LOOP-9`, naming
+      each unrunnable gate, its root, and the missing binary or package.
+   7. **On a clean preflight**: record in `runtime-artifacts/audit.md` — the clean-room type (venv /
+      container image + digest), the exact commands run, each gate's outcome, and which behavioural
+      evidence was reused rather than re-run — then proceed to the push below. Save the raw output to
+      `reports/eval-evidence/story-[N.M]/preflight/`.
+3. **Push & raise the PR via the `pr-generator` skill (used as-is — DO NOT edit it)**:
+   - Invoke the `pr-generator` Claude skill in WORKFLOW mode, passing target branch = the Epic Branch from `runtime-artifacts/aire-state.md` `## Branching` — story PRs merge into the epic branch, NEVER into main/the base branch. The skill diffs the story branch against the target, reads `runtime-artifacts/aire-state.md` + `runtime-artifacts/audit.md` for context, drafts the PR title/body (the title MUST carry the `[STORY]` prefix — this is a story → epic-branch PR), then pushes the branch, ensures the `ai-generated` and `aire-v[N]` labels, and opens the PR.
+   - **pr-generator's Phase 5 confirmation is SKIPPED in workflow mode** — the `dev-implement` invocation authorized the whole run, including the push and the PR. The skill announces the drafted title/body/labels/target and proceeds. Never ask the user whether to push or open the PR.
+   - **Pass the eval scorecard** to pr-generator: give it the PATH `reports/eval-evidence/story-[N.M]/eval-summary.md`; it pastes the file's CONTENTS verbatim into the PR body's `## Eval Scorecard` section.
+   - **VERIFY IT LANDED — do not assume.** After the PR is created, read the PR body back (`gh pr view <n> --json body`) and confirm the scorecard table is present. If it is missing, edit the PR to add it, then re-verify. Never write "the PR carries the scorecard" into runtime-artifacts/audit.md on the basis of having passed the path — record only what reading the body actually showed. A claim in the audit trail that does not match the artifact is a defect in the audit trail.
+4. **MANDATORY**: Record in runtime-artifacts/audit.md the PR outcome returned by pr-generator (branch pushed, PR URL, labels applied — `ai-generated` + `aire-v[N]`), including the `**TRACKER ITEM**:` and `**Epic Link**:` fields.
+5. **STORE THE PR AND KEEP THE STORY `In Development` (do NOT promote on PR raise)**:
+   - In this story's fragment `runtime-artifacts/stories/story-[N.M]/state.md` `## Story Tracker Row` (never the shared table — `common/parallel-work-state.md`), set PR → the PR URL returned by pr-generator, Merged → `no`, Recorded → current timestamp. Do not push a commit just for this — a state-only push would start a full CI run on a new head SHA and invalidate the CI Attestation below. The fragment was committed with `PR: pending` in Step 2; this update rides the next commit the story gets (an attestation fix, a `pr-fix` round), and until then every reader resolves `pending` live from the head branch (`common/parallel-work-state.md` Section 4.6). Do NOT change Status — the story remains `In Development`. Raising the PR is NOT the promotion trigger; merging it is.
+   - **Do NOT transition the tracker here** and do NOT set `End`. The story moves to `Ready for Testing` — in the local tracker AND on the external tracker — ONLY when its PR is confirmed MERGED, handled by the `ve-list-work` skill (dev-implement's own Doability Gate live-checks a prerequisite's merge state when needed, but never promotes this story's tracker status itself).
+   - **MANDATORY** — record in `runtime-artifacts/audit.md` (per Step 7 above) the developed ticket as a full tracker hyperlink, the PR URL, and that the story stays `In Development` pending merge (Merged=no).
+6. **Ready set unchanged**: because this story's PR is not merged yet, it does NOT yet unblock dependents. Dependents become selectable as soon as this story's PR merges (the Doability Gate checks the merge live; ve sign-off is not required for that). (This aligns with the branch-cut dependency-merge check in `common/branching-strategy.md` — a dependent needs its prerequisite's code MERGED into the epic branch.)
+7. **EPIC → Ready for Testing (only when ALL PRs are MERGED)**: The epic moves to Ready for Testing only when EVERY story is `Ready for Testing` (i.e. every PR merged). Since the just-raised PR is not merged yet, this typically does NOT fire here — it fires from the `ve-list-work` skill once the last PR merges and ve has signed every story off. If this is the last story and one or more PRs are still open, do NOT move the epic — instead report:
+   ```
+    Story [N.M] PR raised (kept In Development until merged).
+    As checked, these story PRs are still OPEN — hence keeping their status as In Development,
+      and the Parent Epic stays In Development until every PR is merged:
+        • Story [X.Y] — [TRACKER-ID] — <PR URL>
+        • ...
+   Merge those PRs, then Verification Engineer (on the epic branch) uses the skill `ve-list-work` — it lists the
+      merged stories, and promotes the ones Verification Engineer has tested to Ready for Testing; when ALL are
+      signed off, the Epic is offered a move to Ready for Testing. The exact instructions are repeated in the Section F handoff below.
+   ```
+   Only when `ve-list-work` later leaves EVERY story `Ready for Testing` is the Parent Epic (from `## Tracker`) offered a confirm-first transition to "Ready for Testing" (verified, logged). Skip the epic transition silently if `## Tracker` records `Parent Epic: none`, or if `Type: LOCAL`.
+8. **CI ATTESTATION GATE — CONDITIONAL on `## CI/CD Configuration` `Enabled: Yes` (MANDATORY, AUTOMATIC when it applies — after the PR is raised, before Section E)**: if `Enabled: No`, SKIP this gate entirely and proceed straight to Section E — there is no CI pipeline run to attest against, so there is nothing to check. Otherwise, this is
+   the one place "CI does not know about the code this workflow just wrote" is mechanically detectable —
+   never skip it because the PR was "just raised and CI hasn't had time yet."
+   **SCOPE — THIS GATE REPAIRS CI CONFIGURATION ONLY** (`common/ci-pipeline-generation.md` Section 6.6):
+   once the PR exists, this workflow owns the **manifest fragment, the repo's dependency declarations, the
+   pipeline scripts and tool pins**; **CI self-repair owns application code and tests**. A CI failure
+   triaged as Code class (Section 6.4) is not fixed here — self-repair owns it, on its own
+   `retryLimitForSelfRepair` budget; this gate records it and does not spend an attempt on it. A
+   **Manifest/provisioning** failure is the reverse: `auto-fix-agent.*` reports it without burning an
+   attempt, and it is fixed HERE. **And never push into an in-flight repair**: before pushing anything
+   to this PR head, check for a self-repair run `queued`/`in_progress` on it
+   (`gh run list --branch <head> --json status,name`) and for any `fix(ci): self-repair attempt <n>` commit
+   newer than local `HEAD`; if either exists, **wait for that run to conclude, then `git fetch` + rebase
+   onto it** and re-read the result before deciding anything. Never force-push, and never revert
+   self-repair's commit to apply your own. Both agents pushing to one head is what turned a provisioning
+   bug into two wasted repair budgets.
+   1. Confirm a run of `agentic-eval-pipeline.yml` exists for this PR's head SHA
+      (`gh pr checks <n>` / `gh run list --commit <sha>`). **No run at all is a blocking finding, not
+      a note** — it means the trigger filter, the branch, or the workflow file itself is wrong.
+   2. **Watch it to conclusion** (`gh run watch <id>`); download `eval.json` from the `eval-results`
+      artifact once it finishes.
+   3. **Cross-check CI's `gates` block against this story's own local gate results** (the same
+      `eval.json`/`static-results.json.gates` this run already produced locally). A gate that passed
+      **locally** but is absent or `N/A` in CI is a manifest defect — the story's code exists in a
+      place the pipeline does not know to look (most often: Step 1.5's fragment missed a `sourcePaths`
+      entry the story's diff actually touches). A gate that **ERRORed in CI on a missing tool or an
+      undeclared dependency** is the same class (provisioning) — and since Step 2.5's preflight is supposed
+      to make it impossible, also record why preflight missed it (an ambient-environment shortcut? a
+      root scoped out? a fix that never reached the fragment?), so the escape is fixed and not just the
+      symptom.
+   4. **Check the SH-LOOP-10 counter BEFORE starting an attempt.** If 3 attempts have already been
+      spent, do not start another — go directly to item 7 (Exhaustion) below.
+   5. **On a mismatch**: go back to Step 1.5, correct the fragment (extend it — never remove another
+      unit's entry), re-run the Step 2.5 preflight for the affected root so the fix is proven in a
+      clean room rather than on CI's clock, then commit, push, and re-verify from Step 1 of this gate.
+      This is SH-LOOP-10 — capped at 3 remediation attempts (SH-1). Log each attempt per SH-3 (root
+      cause, planned fix, files changed, exact command re-run, result). Every push here obeys the
+      no-in-flight-repair rule in this gate's SCOPE note above.
+   6. **On a clean match**: log the attestation (PR URL, run URL, gate-by-gate agreement) in
+      `runtime-artifacts/audit.md` and proceed.
+   7. **Exhaustion (SH-4)**: on the 3rd failed attempt, or an SH-5 stall, apply SH-4 exactly — HALT, do
+      not push further, do not raise/update the PR beyond what already exists, do not change any
+      tracker status, and emit the standard Retry-Limit Report with `[loop name]` = `CI Attestation`
+      and `[SH-LOOP-ID]` = `SH-LOOP-10`, naming each gate CI never saw agreement on. Append the same
+      content to `runtime-artifacts/audit.md` under
+      `## Self-Healing Retry Limit Reached — SH-LOOP-10 (Story N.M)`.
+   8. **A CI failure in the Code class** (a real finding, a failing test, a judge criterion — Section 6.4)
+      is **left to CI self-repair**: record it in `runtime-artifacts/audit.md` with its triage class and
+      the run URL, do not edit `src/**` or `tests/**` from here, and do not spend an attestation attempt on
+      it. Attestation asks one question only — *did CI see and measure this story's code?* — never *is the
+      code correct?*, which the local gates and Section A already answered before the PR existed.
+   This is what makes Step 1.5 self-correcting rather than best-effort: reconciliation writes the
+   manifest, Step 2.5's preflight proves it is runnable, attestation proves CI agreed with it.
+9. Proceed to E. Auto PR Review.
+
+## E. Auto PR Review (MANDATORY, automatic — runs right after the PR is raised; story is still `In Development`)
+1. **Log** in runtime-artifacts/audit.md that automated PR Review is starting for Story [N.M], naming the PR URL/number from Section D.
+2. **Invoke the `pr-review` Claude skill** (`.claude/skills/pr-review/`, used as-is — DO NOT edit it) in its AUTO MODE, passing the PR just raised in Section D so it does not need to ask which PR (its Phase 0 is satisfied automatically). It reads the diff, grounds itself in `runtime-artifacts/aire-state.md` + `runtime-artifacts/audit.md`, and drafts inline comments + a summary review.
+3. **AUTO MODE — post automatically, comments only, no prompt**: the skill posts the review without asking the user (its Phase 5 confirmation is skipped by design in this mode) and only as a plain COMMENT review (summary + inline comments) — NEVER a formal GitHub `APPROVE`/`REQUEST_CHANGES`. The same GitHub identity that just raised the PR is posting the review, so a formal self-review is impossible; there is no decision for the user to make here. Do not re-introduce a prompt around the skill.
+4. **MANDATORY**: Record in runtime-artifacts/audit.md the outcome — review posted automatically (AUTO MODE, comment-only), the posted review URL, findings summary, and the `**TRACKER ITEM**:` and `**Epic Link**:` fields.
+5. Proceed to F. Next-Action Handoff — this run is NOT complete until that message is shown.
+
+## F. Next-Action Handoff (MANDATORY — the LAST thing this run outputs)
+
+**This message closes every `dev-implement` run that raised a PR.** It is professional, short and exact:
+it states that the PR is ready, that it is **reviewed by the Developer and the Verification Engineer
+together**, that **approval and merge are manual** — the framework never approves or merges a pull
+request — and the ONE keyword to type next. The story is `In Development` with an unmerged PR. Do not
+tell the user to check out or switch branches — the next workflow does that itself.
+
+1. **Determine the remaining work first** — count the stories in the resolved `## Story Tracker` that are
+   still `Ready for Development` (call it `[K]`), and whether this story was the last one (no story is
+   `Ready for Development` and no other story is `In Development` with an unmerged PR).
+2. **Present EXACTLY ONE of the two blocks below, verbatim, every placeholder substituted** (`<PR URL>`,
+   `<epic-branch>`, `[N.M]`, `[story title]`, `[EPIC-ID]`). Never ship an unsubstituted placeholder.
+
+   **Case 1 — more stories remain (`K > 0`)**:
+   ```
+   Story [N.M] — [story title] is ready for review.
+
+      Pull request   <PR URL>   ([STORY] → <epic-branch>)
+      Status         In Development — it moves forward only after this PR is merged and signed off.
+      Evidence       The eval scorecard and review summary are in the PR description; the full evidence
+                     is under reports/…/story-[N.M]/ on the branch.
+
+   NEXT STEPS
+      1. Review the pull request together — Developer and Verification Engineer.
+      2. Approve and merge the pull request — both are manual steps.
+         The framework never approves or merges a pull request on anyone's behalf.
+         Changes needed? Leave review comments on the PR, then type:  pr-fix <PR URL>
+      3. Continue with the next story. Type:  dev-implement
+
+   Please type the keyword exactly as shown — other phrasing does not start a framework workflow.
+   ```
+
+   **Case 2 — this was the LAST story of the epic**:
+   ```
+   Story [N.M] — [story title] is ready for review. This is the last story of epic [EPIC-ID].
+
+      Pull request   <PR URL>   ([STORY] → <epic-branch>)
+      Status         In Development — it moves forward only after this PR is merged and signed off.
+      Evidence       The eval scorecard and review summary are in the PR description; the full evidence
+                     is under reports/…/story-[N.M]/ on the branch.
+
+   NEXT STEPS
+      1. Review the pull request together — Developer and Verification Engineer.
+      2. Approve and merge the pull request — both are manual steps.
+         The framework never approves or merges a pull request on anyone's behalf.
+         Changes needed? Leave review comments on the PR, then type:  pr-fix <PR URL>
+      3. Verification Engineer sign-off, once every story PR is merged. Type:  ve-list-work
+         (on <epic-branch>, then Option B). Each story you have tested moves to Ready for Testing;
+         when all are signed off, you are offered the Parent Epic move and pointed to pr-generator
+         for the Epic pull request.
+
+   Please type the keyword exactly as shown — other phrasing does not start a framework workflow.
+   ```
+3. **Say nothing after this block, and put nothing before it in the same message** — no free-form
+   "Summary", no "disclosed gaps" list, no options menu, no extra suggestions. The handoff block IS the
+   final message of the run. (A gap is never reported here: a run with a gap never reaches Section F — it
+   halted with the Self-Heal Limit message.)
+4. **MANDATORY**: log in the story's audit trail which case was presented (more-stories vs last-story) and
+   the keyword the user was told to type.
+
+---
+
+## Tracker Sync Rule (reminder)
+
+This workflow changes story status (`Ready for Development` → `In Development` at story selection, then `In Development` → `Ready for Testing` only through the `ve-list-work` skill, after the PR has merged and the ve has tested it — never by this workflow). The Tracker Sync Rule in `CLAUDE.md` (mechanics in `common/tracker-sync.md` Section 4/Section 5) applies at every status change:
+- If Tracker ID = `—`/`LOCAL` (local story, or `## Tracker` records `Type: LOCAL`): update only the local tracker. No external call.
+- If **Tracker ID is a real JIRA/ADO/GITHUB identifier**: also transition the tracker issue via the mechanism for that type (Atlassian MCP / `az boards` / `gh`) and verify the transition. Never silently update only one side.
+- **Exception — the claim is automatic**: the `Ready for Development → In Development` transition at story pick is applied to the tracker AND the local Story Tracker WITHOUT asking (picking the story is the claim), verified (non-LOCAL) and announced. The later `In Development → Ready for Testing` move is never made by this workflow — only `ve-list-work` Option B makes it. Non-story transitions (e.g., the Parent Epic moves) remain confirm-first.
+- **Assignee on claim**: when the story moves to `In Development`, the tracker issue is ALSO assigned to the operator who typed `dev-implement`, per `common/tracker-sync.md` Section 5 — resolve the session email (the same one stamped as `**User Email**:` in runtime-artifacts/audit.md) and set the assignee via the type-appropriate mechanism (JIRA: `lookupJiraAccountId` + `editJiraIssue`; ADO: `az boards work-item update --assigned-to`; GITHUB: a cached GitHub username + `gh issue edit --add-assignee`), verify, announce, log in runtime-artifacts/audit.md. Automatic (part of the same claim, no confirmation). If the identity doesn't resolve, leave the issue unassigned, warn the user, and continue — never block development on assignment. LOCAL has no assignee concept.
+- **Ready for Testing = PR merged**: a story moves `In Development` → `Ready for Testing` ONLY when its PR is confirmed MERGED AND ve has named it in the `ve-list-work` skill after testing it (verified + announced + logged). dev-implement never promotes it. Raising the PR stores the PR URL and keeps the story `In Development` (`Merged=no`).
+- **Epic status sync**: when the FIRST story moves to `In Development`, the Parent Epic is transitioned to "In Development" automatically (Story Selection Step 5); when the LAST story reaches `Ready for Testing` (all PRs merged), the Parent Epic is transitioned to "Ready for Testing" confirm-first (from `ve-list-work`). Both are verified (non-LOCAL) and logged in runtime-artifacts/audit.md.
+
+---
+
+## Critical Rules
+
+Each rule's full text lives in the step named; this is the index. Rules that appear only here are
+stated in full.
+
+- **Where things go**: application code in `src/` (or the recorded `## Code Root`), tests in `tests/`,
+  specs and docs in `spec/` (`common/directory-structure.md`).
+- **Contracts come first**: the story's `.feature` and manual test plan were approved at the STOP
+  CHECKPOINT; this run verifies them and never rewrites them to match code (Steps 4.5 and 6.7).
+- **One story per session, in this session**: show the sequential banner (Step 1.75); never fork or
+  delegate (Step 1.7); write only this story's fragment (Parallel-safe state section).
+- **Never guess the story**: ask and wait (Step 2). A change to work the epic already built goes to
+  `epic-enhance` or `epic-bugfix`, not `dev-implement`; a rejected story PR goes to `pr-fix`.
+- **No approval prompts after the story key**: the only stops are the Doability Gate, the
+  dependency-merge check, the Playwright agent-install pause (Step 4.3) and an SH-4 halt.
+- **Merging is always the user's**: never merge a PR, never bypass the Doability Gate, always cut the
+  story branch from the refreshed epic branch (Steps 1.5 and 2, `implementation/story-selection.md`).
+- **Plan discipline**: the plan is grounded in the design artifacts and REQ-ID-traced before it runs
+  (Step 4). A needed deviation is applied only after the plan document is revised, announced and logged.
+- **Every gate runs, in order, with evidence**: baselines (Items 4.5–4.7) → unit and coverage (6) →
+  behavioural (6.1) → API (6.2) → test placement (6.3) → regression (6.5) → static (6.6) → test plans
+  and Playwright (6.7) → Playwright regression (6.8) → review, judges and remediate (Sections A–C).
+  Evidence per `common/work-unit-artifacts.md`. J1/J2 are blocking (SH-LOOP-6); never pass a gate by
+  editing a rubric, `architecture.md`, a threshold or a test (SH-6).
+- **Bounded self-healing**: every loop gets 3 attempts, then HALT (SH-1 … SH-7,
+  `common/self-heal-limit-guidance.md` Section 0).
+- **CI/CD only when enabled**: Section D Steps 1.5, 2.5 and 8 run only with `Enabled: Yes`; then
+  never push before the CI Preflight Gate passes, and after the PR follow the repair territories in
+  `common/ci-pipeline-generation.md` Section 6.6.
+- **Tracker**: the only transition this workflow makes is the automatic claim (In Development, with
+  assignee). `Ready for Testing` is set only by `ve-list-work` after the merge. Epic moves follow
+  CLAUDE.md's Epic Status Sync. Verify every transition and update the Story Tracker row and
+  `Recorded` on every change.
+- **Ending the run**: commit (with the `AIRE-Version: [N]` trailer), push and the `[STORY]` PR via
+  `pr-generator`, then `pr-review` in AUTO MODE, all automatic once the verdict is clean (Section D–E);
+  the run ends with the Section F handoff, verbatim.
+- **Audit**: every entry uses the format at the top of this file.
+
+---
