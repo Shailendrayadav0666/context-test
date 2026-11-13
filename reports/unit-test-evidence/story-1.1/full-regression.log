@@ -1,0 +1,17 @@
+== Full regression — 2026-11-13T09:34:10Z — branch story/1.1-upgrade-to-premium-button-with-premium-details-modal @ 532e230 + story-1.1 working tree
+== Frontend: (cd src/frontend && npx vitest run --passWithNoTests)
+
+ RUN  v5.1.0 C:/Users/shailendra.yadav/Desktop/projects/context-test/src/frontend
+
+
+ Test Files  2 passed (2)
+      Tests  21 passed (21)
+   Start at  15:04:15
+   Duration  5.06s (environment 73%, import 19%, tests 7%, transform 1%)
+
+exit=0
+== Frontend behaviour suite: covered by B1/B3 (reports/behavior-test-evidence/story-1.1/)
+== Backend: (cd src/backend && python -m pytest -q)
+
+no tests ran in 0.00s
+exit=5

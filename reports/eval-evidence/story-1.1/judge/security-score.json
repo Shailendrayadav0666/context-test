@@ -1,0 +1,56 @@
+{
+  "key": "story-1.1",
+  "gate": "J2_security",
+  "reviewPass": 2,
+  "scoredAt": "2026-11-13T11:05:27Z",
+  "judgeModel": "claude-opus-5-5",
+  "rubricVersion": "1.1.0",
+  "min": 0.85,
+  "score": 1,
+  "status": "PASS",
+  "weighting": "SEC-05 N/A, excluded; remaining weights renormalised to 1.0 (divided by 0.90). Exact score 0.90/0.90 = 1.0",
+  "criteria": [
+    {
+      "id": "SEC-01",
+      "owasp": "A01:2025",
+      "weight": 0.2,
+      "score": 1,
+      "evidence": "/billing still wrapped in ProtectedRoute (App.jsx:56-62, unchanged); no route added"
+    },
+    {
+      "id": "SEC-02",
+      "owasp": "A02:2025",
+      "weight": 0.15,
+      "score": 1,
+      "evidence": "changed config vitest.config.js:43 (coverage include only), root playwright.config.ts (test-only); no CORS/header/debug change"
+    },
+    {
+      "id": "SEC-03",
+      "owasp": "A03:2025",
+      "weight": 0.2,
+      "score": 1,
+      "evidence": "devDependencies added in src/frontend/package.json:18-22 now ship with src/frontend/package-lock.json (no longer ignored, src/frontend/.gitignore); pinned @amiceli/vitest-cucumber 8.0.0, @playwright/test 1.65.0, @testing-library/user-event 14.6.10 from registry.npmjs.org; npm audit 0 vulnerabilities; root package-lock.json committed for root @playwright/test"
+    },
+    {
+      "id": "SEC-04",
+      "owasp": "A05:2025",
+      "weight": 0.25,
+      "score": 1,
+      "evidence": "PremiumUpgradeModal.jsx:58-84 and Billing.jsx:189-201 render static strings as JSX text; no dangerouslySetInnerHTML/innerHTML/eval"
+    },
+    {
+      "id": "SEC-05",
+      "owasp": "A07:2025",
+      "weight": 0.1,
+      "score": "N/A",
+      "reason": "the diff changes no login, token or session code"
+    },
+    {
+      "id": "SEC-06",
+      "owasp": "A10:2025",
+      "weight": 0.1,
+      "score": 1,
+      "evidence": "upgrade UI exists only after billing data loads (Billing.jsx:129-135 loading branch) — fails closed; no raw error rendered on the changed paths (TC-SEC-04 headed PASS)"
+    }
+  ]
+}

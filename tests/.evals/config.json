@@ -36,7 +36,7 @@
     "backendReadinessUrl": null,
     "_comment": "Set true, with startCommand/readinessUrl resolved and testCommand adjusted if needed, the first time a work unit runs the Playwright UI Automation Gate for real."
   },
-  "judge": { "model": "claude-opus-5-5", "rubricVersion": "1.0.0" },
+  "judge": { "model": "claude-opus-5-5", "rubricVersion": "1.1.0" },
   "ci": {
     "baseBranch": "main",
     "integrationBranchPrefixes": ["epic", "bug", "enh", "ci", "story", "ve"],

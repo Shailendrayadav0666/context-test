@@ -1,6 +1,6 @@
 {
   "rubricName": "Architectural Alignment — StreamPlex (Upgrade to Premium button)",
-  "rubricVersion": "1.0.0",
+  "rubricVersion": "1.1.0",
   "derivedFrom": ["spec/plans/architecture.md#10-verifiable-constraints"],
   "evalCriteria": [
     {
@@ -33,9 +33,9 @@
     },
     {
       "id": "ARCH-05",
-      "metric": "Reuse existing styling, no new dependencies",
+      "metric": "Reuse existing styling, no new runtime dependencies",
       "weight": 0.10,
-      "prompt": "The button uses the `btn` class from App.css, and `src/frontend/package.json` dependencies/devDependencies are unchanged. Score 0 if a new package is added or the button bypasses `.btn` for a different primary style.",
+      "prompt": "The button uses the `btn` class from App.css, and the `dependencies` block of `src/frontend/package.json` is unchanged (test tooling in `devDependencies`, such as the framework-mandated `@playwright/test`, is allowed). Score 0 if a runtime package is added or the button bypasses `.btn` for a different primary style.",
       "source": "spec/plans/requirements.md (REQ-NF-02, REQ-NF-05)"
     }
   ]

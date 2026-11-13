@@ -1,0 +1,46 @@
+{
+  "key": "story-1.1",
+  "base": "532e230",
+  "match": "(rule-id, file, message) \u2014 never line",
+  "D1_lint": {
+    "baseline": 3,
+    "post": 3,
+    "new": 0,
+    "newErrors": 0
+  },
+  "D3_sast": {
+    "baseline": 0,
+    "post": 0,
+    "new": 0
+  },
+  "D4_deps": {
+    "baseline": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "post": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    }
+  },
+  "D5_licenses": {
+    "packages": 8,
+    "disallowed": []
+  },
+  "D6_complexity": {
+    "baseline": 0,
+    "post": 0
+  },
+  "D7_secrets": {
+    "baseline": 0,
+    "post": 0
+  }
+}

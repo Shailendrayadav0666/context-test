@@ -1,6 +1,6 @@
 # Architecture — StreamPlex (Upgrade to Premium button)
 
-> **Version**: 1.0.0 · **Generated**: 2026-11-13T08:44:23Z · **AIRE**: v1.0
+> **Version**: 1.1.0 · **Generated**: 2026-11-13T08:44:23Z · **AIRE**: v1.0
 > **Derived from**: spec/plans/atlas-deep-dive.md, spec/plans/code-structure.md, spec/plans/api-documentation.md, spec/plans/requirements.md, spec/plans/stories.md, spec/plans/executions.md
 > **Existing-system baseline**: none from Atlas — Existing-system context derived locally; Atlas was not consulted.
 > **Skipped design stages**: Application Design, Functional Design, NFR Requirements, NFR Design, Infrastructure Design (all skipped in spec/plans/executions.md). Where a section would have drawn on them, it says so and states the default.
@@ -106,9 +106,9 @@ Unchanged (Infrastructure Design skipped — none needed). Vite dev server / pro
 - **Weight**: 0.15
 - **Source**: spec/plans/requirements.md (REQ-NF-03)
 
-### ARCH-05 — Reuse existing styling, no new dependencies
-- **Constraint**: The button reuses the existing `.btn` class and no new npm dependency is added.
-- **Verifiable as**: The button uses the `btn` class from App.css, and `src/frontend/package.json` dependencies/devDependencies are unchanged. Score 0 if a new package is added or the button bypasses `.btn` for a different primary style.
+### ARCH-05 — Reuse existing styling, no new runtime dependencies
+- **Constraint**: The button reuses the existing `.btn` class and no new runtime npm dependency is added.
+- **Verifiable as**: The button uses the `btn` class from App.css, and the `dependencies` block of `src/frontend/package.json` is unchanged (test tooling in `devDependencies`, such as the framework-mandated `@playwright/test`, is allowed). Score 0 if a runtime package is added or the button bypasses `.btn` for a different primary style.
 - **Weight**: 0.10
 - **Source**: spec/plans/requirements.md (REQ-NF-02, REQ-NF-05)
 
@@ -117,3 +117,6 @@ Unchanged (Infrastructure Design skipped — none needed). Vite dev server / pro
 - Backend Premium plan data or an upgrade endpoint.
 - Top navigation bar placement; a separate /upgrade route.
 - A generic modal library or design-system dependency.
+
+## Change Log
+- 1.1.0 (dev-implement Story 1.1, before code): ARCH-05 narrowed from "no dependency changes" to "no new runtime dependency" — the framework-mandated Playwright readiness step adds `@playwright/test` as a devDependency, which the 1.0.0 wording would have forbidden. Weights unchanged.

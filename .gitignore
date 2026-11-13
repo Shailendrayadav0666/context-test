@@ -1,0 +1,10 @@
+# Workspace-root tooling (Playwright lives at the workspace root — playwright-automation.md Step -1)
+/node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+# Generated coverage output inside the frontend project (evidence copies live under reports/)
+src/frontend/coverage/
+# Playwright MCP server scratch output (page snapshots, console logs) — not project files
+/.playwright-mcp/

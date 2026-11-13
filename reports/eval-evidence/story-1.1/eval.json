@@ -1,0 +1,220 @@
+{
+  "key": "story-1.1",
+  "trackerId": "LOCAL",
+  "evalFrameworkVersion": "1.0.0",
+  "rubricVersion": "1.1.0",
+  "judgeModel": "claude-opus-5-5",
+  "scope": "changed-files",
+  "bootstrap": {
+    "created": [
+      {
+        "check": "D6_complexity",
+        "path": "tests/.evals/static/oxlint-complexity.json",
+        "tool": "oxlint"
+      },
+      {
+        "check": "D7_secrets",
+        "path": ".gitleaks.toml",
+        "tool": "gitleaks"
+      }
+    ],
+    "reused": [
+      {
+        "check": "D1_lint",
+        "path": "src/frontend/.oxlintrc.json",
+        "note": "repo's own config, used as-is"
+      }
+    ]
+  },
+  "gates": {
+    "D1_lint": {
+      "status": "PASS",
+      "newFindings": 0
+    },
+    "D2_types": {
+      "status": "N/A",
+      "reason": "plain JavaScript (.jsx) — no type checker applies to this stack"
+    },
+    "D3_sast": {
+      "status": "PASS",
+      "new": {
+        "critical": 0,
+        "high": 0,
+        "medium": 0
+      }
+    },
+    "D4_deps": {
+      "status": "PASS",
+      "new": {
+        "critical": 0,
+        "high": 0
+      }
+    },
+    "D5_licenses": {
+      "status": "PASS",
+      "violations": []
+    },
+    "D6_complexity": {
+      "status": "PASS",
+      "violations": 0,
+      "threshold": 12
+    },
+    "D7_secrets": {
+      "status": "PASS",
+      "findings": 0
+    },
+    "unitCoverage": {
+      "status": "PASS",
+      "value": 100,
+      "threshold": 90
+    },
+    "behaviorB1": {
+      "status": "PASS",
+      "scenarios": "10/10",
+      "acsCovered": "5/5",
+      "containerised": true,
+      "image": "localhost/aire-behavior:local@sha256:db2e32af88f81063b842ea29609b3e40942e2c517b39e09ce370a165ddfffe64"
+    },
+    "behaviorB2": {
+      "status": "N/A",
+      "reason": "spec/behavior/ holds no other feature file"
+    },
+    "behaviorB3": {
+      "status": "PASS",
+      "scenarios": "10/10",
+      "featureFiles": 2,
+      "note": "last and only work unit; spec/behavior.feature has 0 scenarios by design"
+    },
+    "apiContract": {
+      "status": "N/A",
+      "reason": "plan has no API Layer Generation step"
+    },
+    "playwright": {
+      "status": "PASS",
+      "scenarios": "18/18",
+      "headed": true,
+      "fixme": 0,
+      "reExecutedInCI": false
+    },
+    "playwrightRegression": {
+      "status": "N/A",
+      "reason": "tests/e2e/ held no spec at baseline"
+    },
+    "regression": {
+      "status": "PASS",
+      "newFailures": 0
+    },
+    "J1_architecture": {
+      "status": "PASS",
+      "score": 1,
+      "min": 0.85,
+      "rubricSource": "architecture.md#10 (v1.1.0)",
+      "criteria": [
+        {
+          "id": "ARCH-01",
+          "weight": 0.3,
+          "score": 1
+        },
+        {
+          "id": "ARCH-02",
+          "weight": 0.25,
+          "score": 1
+        },
+        {
+          "id": "ARCH-03",
+          "weight": 0.2,
+          "score": 1
+        },
+        {
+          "id": "ARCH-04",
+          "weight": 0.15,
+          "score": 1
+        },
+        {
+          "id": "ARCH-05",
+          "weight": 0.1,
+          "score": 1
+        }
+      ]
+    },
+    "J2_security": {
+      "status": "PASS",
+      "score": 1,
+      "min": 0.85,
+      "criteria": [
+        {
+          "id": "SEC-01",
+          "owasp": "A01:2025",
+          "weight": 0.2,
+          "score": 1
+        },
+        {
+          "id": "SEC-02",
+          "owasp": "A02:2025",
+          "weight": 0.15,
+          "score": 1
+        },
+        {
+          "id": "SEC-03",
+          "owasp": "A03:2025",
+          "weight": 0.2,
+          "score": 1
+        },
+        {
+          "id": "SEC-04",
+          "owasp": "A05:2025",
+          "weight": 0.25,
+          "score": 1
+        },
+        {
+          "id": "SEC-05",
+          "owasp": "A07:2025",
+          "weight": 0.1,
+          "score": "N/A",
+          "reason": "the diff changes no login, token or session code"
+        },
+        {
+          "id": "SEC-06",
+          "owasp": "A10:2025",
+          "weight": 0.1,
+          "score": 1
+        }
+      ]
+    }
+  },
+  "selfHealing": {
+    "SH-LOOP-1": {
+      "attempts": 0,
+      "budget": 3
+    },
+    "SH-LOOP-3": {
+      "attempts": 0,
+      "budget": 3
+    },
+    "SH-LOOP-4": {
+      "attempts": 1,
+      "budget": 3
+    },
+    "SH-LOOP-6": {
+      "attempts": 1,
+      "budget": 3
+    },
+    "SH-LOOP-7": {
+      "attempts": 0,
+      "budget": 3
+    },
+    "SH-LOOP-8": {
+      "attempts": 0,
+      "budget": 3
+    },
+    "SH-LOOP-11": {
+      "attempts": 0,
+      "budget": 3
+    },
+    "SH-LOOP-12": {
+      "attempts": 0,
+      "budget": 3
+    }
+  },
+  "verdict": "PASS"
+}

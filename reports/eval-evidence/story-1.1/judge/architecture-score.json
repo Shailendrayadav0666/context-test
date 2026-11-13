@@ -1,0 +1,45 @@
+{
+  "key": "story-1.1",
+  "gate": "J1_architecture",
+  "reviewPass": 2,
+  "scoredAt": "2026-11-13T11:05:27Z",
+  "judgeModel": "claude-opus-5-5",
+  "rubricVersion": "1.1.0",
+  "rubricSource": "spec/plans/architecture.md#10 (v1.1.0)",
+  "min": 0.85,
+  "score": 1,
+  "status": "PASS",
+  "criteria": [
+    {
+      "id": "ARCH-01",
+      "weight": 0.3,
+      "score": 1,
+      "evidence": "no change under src/backend/; no fetch/XHR added — Billing.jsx:88-104 (openUpgrade/closeUpgrade/continueUpgrade are state-only); PremiumUpgradeModal.jsx has no request call"
+    },
+    {
+      "id": "ARCH-02",
+      "weight": 0.25,
+      "score": 1,
+      "evidence": "PremiumUpgradeModal.jsx:1-89 imports only useEffect/useRef; visibility via the open prop owned by Billing.jsx:84 (showUpgrade)"
+    },
+    {
+      "id": "ARCH-03",
+      "weight": 0.2,
+      "score": 1,
+      "evidence": "button only in the active-plan return branch, Billing.jsx:189-196; loading branch 129-135 and has_plan===false branch 137-159 contain no button"
+    },
+    {
+      "id": "ARCH-04",
+      "weight": 0.15,
+      "score": 1,
+      "evidence": "PremiumUpgradeModal.jsx:51-54 role=dialog, aria-modal, aria-labelledby; :29-33 focus on open; :39-44 Escape; Billing.jsx:94-104 focus restore"
+    },
+    {
+      "id": "ARCH-05",
+      "weight": 0.1,
+      "score": 1,
+      "evidence": "className 'btn upgrade-btn' Billing.jsx:192; src/frontend/package.json dependencies block (:12-16) unchanged — only devDependencies/overrides changed"
+    }
+  ],
+  "note": "pass 2 (NEW_CHANGES): the only change since pass 1 is src/frontend/.gitignore and the committed lockfile — no ARCH criterion affected; scored once, unchanged"
+}

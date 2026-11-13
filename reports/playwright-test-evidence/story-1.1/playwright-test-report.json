@@ -1,0 +1,1033 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\Users\\shailendra.yadav\\Desktop\\projects\\context-test\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "tests/e2e/story-1.1-upgrade-to-premium-button-with-premium-details-modal/",
+      "--headed",
+      "--reporter=list,json"
+    ],
+    "configFile": "C:\\Users\\shailendra.yadav\\Desktop\\projects\\context-test\\playwright.config.ts",
+    "rootDir": "C:/Users/shailendra.yadav/Desktop/projects/context-test/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/shailendra.yadav/Desktop/projects/context-test/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/shailendra.yadav/Desktop/projects/context-test/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "C:\\Users\\shailendra.yadav\\Desktop\\projects\\context-test\\test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "chromium",
+        "testDir": "C:\\Users\\shailendra.yadav\\Desktop\\projects\\context-test\\tests\\e2e",
+        "snapshotDir": "C:\\Users\\shailendra.yadav\\Desktop\\projects\\context-test\\tests\\e2e",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 30000,
+        "use": {
+          "baseURL": "http://localhost:5173",
+          "trace": "retain-on-failure",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.8127.18 Safari/537.36",
+          "viewport": {
+            "width": 1280,
+            "height": 720
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": false,
+          "hasTouch": false,
+          "defaultBrowserType": "chromium",
+          "headless": false
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "chromium"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "story-1.1-upgrade-to-premium-button-with-premium-details-modal\\tc-a11y-01-open-with-keyboard.spec.ts",
+      "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-a11y-01-open-with-keyboard.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Upgrade to Premium button",
+          "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-a11y-01-open-with-keyboard.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-A11Y-01 Open with keyboard",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1700,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T10:49:43.291Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e32338539d7502491e04-94b977806eb59b1079a6",
+              "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-a11y-01-open-with-keyboard.spec.ts",
+              "line": 6,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "story-1.1-upgrade-to-premium-button-with-premium-details-modal\\tc-a11y-02-focus-moves-into-dialog.spec.ts",
+      "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-a11y-02-focus-moves-into-dialog.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Upgrade to Premium button",
+          "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-a11y-02-focus-moves-into-dialog.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-A11Y-02 Focus moves into dialog on open",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1144,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T10:49:45.418Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3b3469cbfc62c549fdfa-aefd1868a671064533ed",
+              "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-a11y-02-focus-moves-into-dialog.spec.ts",
+              "line": 6,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "story-1.1-upgrade-to-premium-button-with-premium-details-modal\\tc-a11y-03-named-modal-dialog.spec.ts",
+      "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-a11y-03-named-modal-dialog.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Upgrade to Premium button",
+          "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-a11y-03-named-modal-dialog.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-A11Y-03 Named modal dialog (role/name)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1089,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T10:49:46.580Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "5e0a3c6d367c2ff634ad-7b318d5c8c40c9abf8b8",
+              "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-a11y-03-named-modal-dialog.spec.ts",
+              "line": 6,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "story-1.1-upgrade-to-premium-button-with-premium-details-modal\\tc-a11y-04-escape-closes-focus-returns.spec.ts",
+      "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-a11y-04-escape-closes-focus-returns.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Upgrade to Premium button",
+          "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-a11y-04-escape-closes-focus-returns.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-A11Y-04 Escape closes and focus returns",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1568,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T10:49:47.691Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e9354d750679c47f9e76-372c1d42f33db28e0483",
+              "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-a11y-04-escape-closes-focus-returns.spec.ts",
+              "line": 6,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "story-1.1-upgrade-to-premium-button-with-premium-details-modal\\tc-a11y-05-cancel-close-return-focus.spec.ts",
+      "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-a11y-05-cancel-close-return-focus.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Upgrade to Premium button",
+          "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-a11y-05-cancel-close-return-focus.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-A11Y-05 Cancel and Close return focus",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1751,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T10:49:49.283Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7c95661b9a88ac67a69b-686d324cd6ff6d782656",
+              "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-a11y-05-cancel-close-return-focus.spec.ts",
+              "line": 6,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "story-1.1-upgrade-to-premium-button-with-premium-details-modal\\tc-a11y-06-zoom-200-and-contrast.spec.ts",
+      "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-a11y-06-zoom-200-and-contrast.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Upgrade to Premium button",
+          "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-a11y-06-zoom-200-and-contrast.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-A11Y-06 Zoom 200% and contrast",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1246,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T10:49:51.057Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "02fb6956669ac2c078d2-13b2b735362fbaa0920c",
+              "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-a11y-06-zoom-200-and-contrast.spec.ts",
+              "line": 6,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "story-1.1-upgrade-to-premium-button-with-premium-details-modal\\tc-e2e-01-button-shown-active-plan.spec.ts",
+      "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-01-button-shown-active-plan.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Upgrade to Premium button",
+          "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-01-button-shown-active-plan.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-E2E-01 Button shown for an active Standard plan",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1139,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T10:49:52.327Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "ca14b1f9efb9b1a2ba96-7dd77759b2b88ea40a24",
+              "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-01-button-shown-active-plan.spec.ts",
+              "line": 6,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "story-1.1-upgrade-to-premium-button-with-premium-details-modal\\tc-e2e-02-button-hidden-no-plan.spec.ts",
+      "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-02-button-hidden-no-plan.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Upgrade to Premium button",
+          "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-02-button-hidden-no-plan.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-E2E-02 Button hidden when there is no active plan",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1004,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T10:49:53.487Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fde988d36d3295c9e65d-65e1d2e2dc180cbbe25b",
+              "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-02-button-hidden-no-plan.spec.ts",
+              "line": 6,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "story-1.1-upgrade-to-premium-button-with-premium-details-modal\\tc-e2e-03-button-hidden-while-loading.spec.ts",
+      "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-03-button-hidden-while-loading.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Upgrade to Premium button",
+          "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-03-button-hidden-while-loading.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-E2E-03 Button hidden while billing data is loading",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3822,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T10:49:54.509Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9adc802b988cc954bdc1-1f889a8da06c5c43d825",
+              "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-03-button-hidden-while-loading.spec.ts",
+              "line": 6,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "story-1.1-upgrade-to-premium-button-with-premium-details-modal\\tc-e2e-04-open-modal-premium-details.spec.ts",
+      "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-04-open-modal-premium-details.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Upgrade to Premium button",
+          "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-04-open-modal-premium-details.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-E2E-04 Open the modal and see Premium details",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1145,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T10:49:58.386Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0379a8b9090dea66c9c4-7efc41b88425f3625145",
+              "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-04-open-modal-premium-details.spec.ts",
+              "line": 6,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "story-1.1-upgrade-to-premium-button-with-premium-details-modal\\tc-e2e-05-continue-coming-soon-keeps-standard.spec.ts",
+      "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-05-continue-coming-soon-keeps-standard.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Upgrade to Premium button",
+          "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-05-continue-coming-soon-keeps-standard.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-E2E-05 Continue shows coming-soon message and keeps Standard",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1358,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T10:49:59.551Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "ac83a8b4b524ed2f7882-a5bafac1f47bed39550a",
+              "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-05-continue-coming-soon-keeps-standard.spec.ts",
+              "line": 6,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "story-1.1-upgrade-to-premium-button-with-premium-details-modal\\tc-e2e-06-cancel-dismisses-no-change.spec.ts",
+      "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-06-cancel-dismisses-no-change.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Upgrade to Premium button",
+          "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-06-cancel-dismisses-no-change.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-E2E-06 Cancel dismisses with no change",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1266,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T10:50:00.931Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "efaebef058fca2a54ece-8349cb58978035231a54",
+              "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-06-cancel-dismisses-no-change.spec.ts",
+              "line": 6,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "story-1.1-upgrade-to-premium-button-with-premium-details-modal\\tc-e2e-07-close-dismisses-no-change.spec.ts",
+      "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-07-close-dismisses-no-change.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Upgrade to Premium button",
+          "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-07-close-dismisses-no-change.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-E2E-07 Close control dismisses with no change",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1378,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T10:50:02.216Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d77abd9d0ffb154f3a06-dad3897e3a7612f62889",
+              "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-07-close-dismisses-no-change.spec.ts",
+              "line": 6,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "story-1.1-upgrade-to-premium-button-with-premium-details-modal\\tc-e2e-08-repeated-open-close-cycles.spec.ts",
+      "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-08-repeated-open-close-cycles.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Upgrade to Premium button",
+          "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-08-repeated-open-close-cycles.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-E2E-08 Repeated open/close cycles stay consistent",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1587,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T10:50:03.619Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b18ee86022ac1e1f7f3b-35dadcf22b73f7d5fef5",
+              "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-e2e-08-repeated-open-close-cycles.spec.ts",
+              "line": 6,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "story-1.1-upgrade-to-premium-button-with-premium-details-modal\\tc-sec-01-no-network-request.spec.ts",
+      "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-sec-01-no-network-request.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Upgrade to Premium button",
+          "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-sec-01-no-network-request.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-SEC-01 Upgrade flow makes no network request",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1296,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T10:50:05.223Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f9f733dd6bc0a7aace2f-78d107084209ca512af6",
+              "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-sec-01-no-network-request.spec.ts",
+              "line": 6,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "story-1.1-upgrade-to-premium-button-with-premium-details-modal\\tc-sec-02-continue-no-account-change.spec.ts",
+      "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-sec-02-continue-no-account-change.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Upgrade to Premium button",
+          "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-sec-02-continue-no-account-change.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-SEC-02 Continue does not change the account",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1522,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T10:50:06.535Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "82303c21018cf4699cfa-0fccb3c19e14d649879c",
+              "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-sec-02-continue-no-account-change.spec.ts",
+              "line": 6,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "story-1.1-upgrade-to-premium-button-with-premium-details-modal\\tc-sec-03-billing-behind-sign-in.spec.ts",
+      "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-sec-03-billing-behind-sign-in.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Upgrade to Premium button",
+          "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-sec-03-billing-behind-sign-in.spec.ts",
+          "line": 6,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-SEC-03 Billing page stays behind sign-in",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 549,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T10:50:08.074Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dfe3dac914a197dbd26e-a44c99dd551f1edf363f",
+              "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-sec-03-billing-behind-sign-in.spec.ts",
+              "line": 7,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "story-1.1-upgrade-to-premium-button-with-premium-details-modal\\tc-sec-04-fail-safe-billing-load-error.spec.ts",
+      "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-sec-04-fail-safe-billing-load-error.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Upgrade to Premium button",
+          "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-sec-04-fail-safe-billing-load-error.spec.ts",
+          "line": 5,
+          "column": 6,
+          "specs": [
+            {
+              "title": "TC-SEC-04 Fail-safe when billing data cannot load",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1436,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-13T10:50:08.642Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "2d55425076952cc4415c-b44147c89b66219d95c9",
+              "file": "story-1.1-upgrade-to-premium-button-with-premium-details-modal/tc-sec-04-fail-safe-billing-load-error.spec.ts",
+              "line": 6,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-13T10:49:42.616Z",
+    "duration": 28332.131999999998,
+    "expected": 18,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
